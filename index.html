@@ -1740,11 +1740,8 @@ async function uploadFile(file, _path, onProgress){
   const formData = new FormData();
   formData.append('file', file);
   formData.append('upload_preset', CLOUDINARY_PRESET);
-  formData.append('access_mode', 'public');  // pastikan file bisa diakses publik
   // determine resource type
   const isPdf = file.type === 'application/pdf';
-  // Untuk PDF: upload sebagai 'image' dengan fl_attachment agar bisa diakses
-  // atau tetap 'raw' tapi dengan access_mode public
   const resourceType = isPdf ? 'raw' : 'image';
   const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/${resourceType}/upload`;
 
