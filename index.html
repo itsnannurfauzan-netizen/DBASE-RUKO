@@ -310,6 +310,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .btn-maps:hover{background:#c8e6c9}
 .btn-pdf{display:inline-flex;align-items:center;gap:6px;background:#fff3e0;color:#e65100;border:none;padding:10px 16px;border-radius:var(--rs);font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;font-family:inherit}
 .btn-pdf:hover{background:#ffe0b2}
+
+/* MULTI DOKUMEN */
+.doc-item{display:flex;align-items:center;justify-content:space-between;background:#fdf6f2;border:1.5px solid #EDD9D0;border-radius:8px;padding:9px 12px;gap:8px}
+.doc-item-left{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+.doc-item-icon{font-size:18px;flex-shrink:0}
+.doc-item-name{font-size:12px;font-weight:700;color:#C0543A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.doc-item-size{font-size:10px;color:var(--muted)}
+.doc-item-actions{display:flex;gap:5px;flex-shrink:0}
+.doc-btn-view{background:#e8f5e9;color:#2e7d32;border:none;padding:5px 9px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center}
+.doc-btn-del{background:#fee2e2;color:#dc2626;border:none;padding:5px 9px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer}
+.doc-uploading{opacity:.6;pointer-events:none}
+
 .ex-empty{text-align:center;padding:50px 20px;color:var(--muted)}
 
 .guest-badge{display:none;margin-left:7px;background:rgba(255,255,255,.2);padding:1px 8px;border-radius:9px;font-size:10px}
@@ -536,24 +548,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         </div>
         <div class="fg full">
           <label class="flbl">File PDF Legalitas (max 10MB)</label>
-          <div id="exPdfExisting" style="display:none;background:#fdf0eb;border:1.5px solid #EDD9D0;border-radius:10px;padding:12px 14px;display:none;align-items:center;justify-content:space-between;gap:10px">
-            <div style="display:flex;align-items:center;gap:8px">
-              <span style="font-size:20px">📄</span>
-              <div>
-                <div style="font-size:13px;font-weight:700;color:#C0543A">File Legalitas Tersimpan</div>
-                <a id="exPdfExistingLink" href="" target="_blank" style="font-size:11px;color:#A03E28;text-decoration:underline">Lihat PDF</a>
-              </div>
-            </div>
-            <button onclick="removeExistingPdf()" style="background:#fee2e2;color:#dc2626;border:none;padding:6px 12px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer">🗑 Hapus</button>
+          <!-- Multi Dokumen -->
+          <div id="exDocsContainer" style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px"></div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <input id="exDocLabel" class="fi" placeholder="Nama dokumen (cth: Sertifikat HGB)" style="flex:1;min-width:160px">
+            <button onclick="triggerDocUpload()" style="background:#C0543A;color:white;border:none;padding:9px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">📎 Pilih File</button>
           </div>
-          <div id="exPdfUploadZone">
-            <div class="upload-zone" id="exPdfZone" onclick="document.getElementById('exPdfInput').click()">
-              <div class="upload-icon">📄</div>
-              <div class="upload-text" id="exPdfText">Klik untuk pilih file PDF</div>
-              <div class="upload-sub">PDF — max 10MB</div>
-            </div>
-          </div>
-          <input type="file" id="exPdfInput" accept=".pdf" style="display:none" onchange="handlePdfSelect(event)">
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">💡 Isi nama dokumen → klik Pilih File → pilih PDF. Bisa tambah lebih dari 1 dokumen.</div>
+          <input type="file" id="exDocFileInput" accept=".pdf,.doc,.docx,.jpg,.png" style="display:none" onchange="handleDocFileSelect(event)">
         </div>
       </div>
       <!-- Upload Progress -->
@@ -1418,9 +1420,8 @@ function renderEkspCards(data){
    EXISTING RUKO
 ══════════════════════════════════════════════ */
 let exFotoFiles = [];   // File objects to upload
-let exPdfFile   = null;
 let exFotoUrls  = [];   // Already-uploaded URLs (edit mode)
-let exPdfUrl    = '';
+// exDocs declared in multi-doc section
 let listingFotoFiles = [];  // New foto files for listing
 let listingFotoUrls  = [];  // Already-uploaded listing foto URLs (edit mode)
 
@@ -1465,8 +1466,9 @@ function exListHTML(r){
   const harga1 = h.h1 ? fmtRp(h.h1) : '—';
   const harga5 = h.h5 ? fmtRp(h.h5) : '—';
   const mapsBtn = r.maps ? `<a class="ex-badge ex-badge-maps" href="${esc(r.maps)}" target="_blank" onclick="event.stopPropagation()">📍 Maps</a>` : '';
-  const pdfUrlL = r.pdf  ? `https://docs.google.com/viewer?url=${encodeURIComponent(r.pdf)}&embedded=true` : '';
-  const pdfBtn  = r.pdf  ? `<a class="ex-badge ex-badge-pdf"  href="${pdfUrlL}"  target="_blank" onclick="event.stopPropagation()">📄 PDF</a>` : '';
+  const allDocsL = [...(r.docs||[])];
+  if(r.pdf && !allDocsL.find(d=>d.url===r.pdf)) allDocsL.unshift({label:'Legalitas',url:r.pdf});
+  const pdfBtn = allDocsL.length ? `<span class="ex-badge ex-badge-pdf" onclick="event.stopPropagation();openExistingDetail('${r._key}')">📁 ${allDocsL.length} Dok</span>` : '';
   const adminBtns = isAdmin ? `
     <button class="btn-sm btn-sm-navy" style="padding:5px 10px;flex:none" onclick="event.stopPropagation();openEditExisting('${r._key}')">✏️</button>
     <button class="btn-sm btn-sm-red" style="padding:5px 10px;flex:none" onclick="event.stopPropagation();openDeleteExisting('${r._key}')">🗑</button>` : '';
@@ -1493,8 +1495,9 @@ function exCardHTML(r){
   const thumb = fotos[0] || 'https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600&q=80';
   const h = r.harga||{};
   const mapsBtn = r.maps ? `<a class="ex-badge ex-badge-maps" href="${esc(r.maps)}" target="_blank" onclick="event.stopPropagation()">📍 Maps</a>` : '';
-  const pdfUrl  = r.pdf  ? `https://docs.google.com/viewer?url=${encodeURIComponent(r.pdf)}&embedded=true` : '';
-  const pdfBtn  = r.pdf  ? `<a class="ex-badge ex-badge-pdf"  href="${pdfUrl}"  target="_blank" onclick="event.stopPropagation()">📄 Legalitas</a>` : '';
+  const allDocs = [...(r.docs||[])];
+  if(r.pdf && !allDocs.find(d=>d.url===r.pdf)) allDocs.unshift({label:'Legalitas',url:r.pdf});
+  const pdfBtn = allDocs.length ? `<span class="ex-badge ex-badge-pdf" onclick="event.stopPropagation();openExistingDetail('${r._key}')">📁 ${allDocs.length} Dokumen</span>` : '';
   const adminBtns = isAdmin ? `
     <button class="btn-sm btn-sm-navy" onclick="event.stopPropagation();openEditExisting('${r._key}')">Edit</button>
     <button class="btn-sm btn-sm-red" style="flex:none;padding:7px 11px" onclick="event.stopPropagation();openDeleteExisting('${r._key}')">🗑</button>` : '';
@@ -1540,10 +1543,21 @@ window.openExistingDetail = function(key){
       <div style="font-size:18px;font-weight:800;color:#C0543A;margin-bottom:4px">${esc(r.nama||'')}</div>
       <div style="font-size:13px;color:var(--muted)">📍 ${esc(r.alamat||'')}</div>
     </div>
-    <div class="ex-docs-row">
-      ${r.maps?`<a class="btn-maps" href="${esc(r.maps)}" target="_blank">📍 Buka Google Maps</a>`:''}
-      ${r.pdf?`<a class="btn-pdf" href="https://docs.google.com/viewer?url=${encodeURIComponent(r.pdf)}&embedded=true" target="_blank">📄 Lihat Dokumen Legalitas</a>`:''}
-    </div>
+    ${r.maps?`<div style="margin-bottom:10px"><a class="btn-maps" href="${esc(r.maps)}" target="_blank">📍 Buka Google Maps</a></div>`:''}
+    ${(()=>{
+      const docs = r.docs||[];
+      // legacy support
+      if(r.pdf && !docs.find(d=>d.url===r.pdf)) docs.unshift({label:'Legalitas',url:r.pdf});
+      if(!docs.length) return '';
+      return '<div style="margin-bottom:12px"><div style="font-size:11px;font-weight:700;color:#C0543A;text-transform:uppercase;letter-spacing:.6px;margin-bottom:7px">📁 Dokumen</div>'
+        + docs.map(d=>`<div style="display:flex;align-items:center;justify-content:space-between;background:#fdf6f2;border:1px solid #EDD9D0;border-radius:8px;padding:8px 11px;margin-bottom:5px">
+          <div style="display:flex;align-items:center;gap:7px">
+            <span style="font-size:16px">📄</span>
+            <span style="font-size:13px;font-weight:600;color:#2C1810">${esc(d.label)}</span>
+          </div>
+          <a href="https://docs.google.com/viewer?url=${encodeURIComponent(d.url)}&embedded=true" target="_blank" class="doc-btn-view">👁 Lihat</a>
+        </div>`).join('') + '</div>';
+    })()}
     <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:8px;text-transform:uppercase;letter-spacing:.6px">💰 Harga per Tahun</div>
     <table class="ex-price-table" style="border-radius:10px;overflow:hidden">
       <thead><tr><th>Tahun</th><th>Harga</th></tr></thead>
@@ -1581,24 +1595,62 @@ function renderFotoPreview(){
 window.removeUploadedFoto = i => { exFotoUrls.splice(i,1); renderFotoPreview(); };
 window.removeNewFoto = i => { exFotoFiles.splice(i,1); renderFotoPreview(); };
 
-window.handlePdfSelect = function(e){
-  exPdfFile = e.target.files[0]||null;
-  const txt = document.getElementById('exPdfText');
-  txt.textContent = exPdfFile ? '📄 '+exPdfFile.name : 'Klik untuk pilih file PDF';
+/* ── MULTI DOKUMEN ── */
+let exDocs = []; // [{label, url, uploading, isNew, file}]
+
+window.triggerDocUpload = function(){
+  const label = document.getElementById('exDocLabel').value.trim();
+  if(!label){ showToast('⚠️ Isi nama dokumen dulu'); document.getElementById('exDocLabel').focus(); return; }
+  document.getElementById('exDocFileInput').click();
 };
 
-window.removeExistingPdf = function(){
-  exPdfUrl = '';
-  exPdfFile = null;
-  // Hide existing, show upload zone
-  const existingDiv = document.getElementById('exPdfExisting');
-  const uploadZone  = document.getElementById('exPdfUploadZone');
-  if(existingDiv) existingDiv.style.display='none';
-  if(uploadZone)  uploadZone.style.display='block';
-  document.getElementById('exPdfText').textContent='Klik untuk pilih file PDF';
-  document.getElementById('exPdfInput').value='';
-  showToast('🗑 File legalitas dihapus — klik Simpan untuk menyimpan perubahan');
+window.handleDocFileSelect = async function(e){
+  const file = e.target.files[0]; if(!file) return;
+  const label = document.getElementById('exDocLabel').value.trim() || file.name.replace(/\.[^.]+$/,'');
+  e.target.value='';
+  // Add as uploading
+  const idx = exDocs.length;
+  exDocs.push({label, url:'', uploading:true, isNew:true, file});
+  renderExDocs();
+  try {
+    const url = await uploadFile(file, 'existing/docs/'+Date.now()+'_'+file.name, ()=>{});
+    exDocs[idx] = {label, url, uploading:false, isNew:true};
+    document.getElementById('exDocLabel').value='';
+    showToast('✅ '+label+' berhasil diupload');
+  } catch(err) {
+    exDocs.splice(idx,1);
+    showToast('❌ Gagal upload: '+err.message);
+  }
+  renderExDocs();
 };
+
+window.removeExDoc = function(i){
+  exDocs.splice(i,1);
+  renderExDocs();
+  showToast('🗑 Dokumen dihapus — klik Simpan untuk menyimpan');
+};
+
+function renderExDocs(){
+  const wrap = document.getElementById('exDocsContainer');
+  if(!wrap) return;
+  if(!exDocs.length){ wrap.innerHTML=''; return; }
+  const ext = url => { const p=url.split('.').pop().toLowerCase().split('?')[0]; return p; };
+  const icon = url => { const e=ext(url); return e==='pdf'?'📄':['jpg','jpeg','png','webp'].includes(e)?'🖼️':'📎'; };
+  wrap.innerHTML = exDocs.map((d,i) => `
+    <div class="doc-item ${d.uploading?'doc-uploading':''}">
+      <div class="doc-item-left">
+        <span class="doc-item-icon">${d.uploading?'⏳':icon(d.url)}</span>
+        <div>
+          <div class="doc-item-name">${esc(d.label)}</div>
+          <div class="doc-item-size">${d.uploading?'Mengupload…':ext(d.url).toUpperCase()}</div>
+        </div>
+      </div>
+      <div class="doc-item-actions">
+        ${!d.uploading?`<a class="doc-btn-view" href="https://docs.google.com/viewer?url=${encodeURIComponent(d.url)}&embedded=true" target="_blank">👁 Lihat</a>`:''}
+        <button class="doc-btn-del" onclick="removeExDoc(${i})">🗑</button>
+      </div>
+    </div>`).join('');
+}
 
 // Drag & drop for foto zone
 function setupDragDrop(){
@@ -1620,12 +1672,10 @@ function clearExForm(){
   document.getElementById('exFormId').value='';
   document.getElementById('exFotoPreview').innerHTML='';
   document.getElementById('exPdfText').textContent='Klik untuk pilih file PDF';
-  exFotoFiles=[]; exPdfFile=null; exFotoUrls=[]; exPdfUrl='';
-  // Reset PDF zone to upload state
-  const exPdfEx = document.getElementById('exPdfExisting');
-  const exPdfUZ = document.getElementById('exPdfUploadZone');
-  if(exPdfEx){ exPdfEx.style.display='none'; }
-  if(exPdfUZ){ exPdfUZ.style.display='block'; }
+  exFotoFiles=[]; exFotoUrls=[]; exDocs=[];
+  const docLabel = document.getElementById('exDocLabel');
+  if(docLabel) docLabel.value='';
+  renderExDocs();
 }
 
 window.openAddExisting = function(){
@@ -1647,19 +1697,15 @@ window.openEditExisting = function(key){
   document.getElementById('exMaps').value=r.maps||'';
   const h=r.harga||{};
   [1,2,3,4,5].forEach(i=>{ if(h['h'+i]) document.getElementById('exH'+i).value=h['h'+i]; });
-  exFotoUrls=[...(r.fotos||[])]; exPdfUrl=r.pdf||''; exFotoFiles=[]; exPdfFile=null;
-  renderFotoPreview();
-  if(exPdfUrl){
-    // Show existing PDF with delete option
-    const existingDiv = document.getElementById('exPdfExisting');
-    const uploadZone  = document.getElementById('exPdfUploadZone');
-    if(existingDiv && uploadZone){
-      existingDiv.style.display='flex';
-      uploadZone.style.display='none';
-      const link = document.getElementById('exPdfExistingLink');
-      if(link){ link.href='https://docs.google.com/viewer?url='+encodeURIComponent(exPdfUrl)+'&embedded=true'; }
-    }
+  exFotoUrls=[...(r.fotos||[])]; exFotoFiles=[];
+  // Load existing docs
+  exDocs = (r.docs||[]).map(d=>({...d, uploading:false, isNew:false}));
+  // Legacy: if old single pdf exists, convert to doc
+  if(r.pdf && !exDocs.find(d=>d.url===r.pdf)){
+    exDocs.unshift({label:'Legalitas', url:r.pdf, uploading:false, isNew:false});
   }
+  renderFotoPreview();
+  setTimeout(()=>renderExDocs(), 50);
   document.getElementById('existingFormTitle').textContent='Edit Ruko Existing';
   document.getElementById('exSaveBtn').textContent='✓ Simpan Perubahan';
   openModal('existingFormOverlay');
@@ -1678,8 +1724,7 @@ window.saveExisting = async function(){
 
   try {
     let uploadedFotos = [...exFotoUrls];
-    let finalPdf = exPdfUrl;
-    const totalFiles = exFotoFiles.length + (exPdfFile?1:0);
+    const totalFiles = exFotoFiles.length;
     let done = 0;
 
     // Upload foto baru
@@ -1690,16 +1735,6 @@ window.saveExisting = async function(){
         progBar.style.width=Math.round((done/totalFiles*100)+(pct/totalFiles))+'%';
       });
       uploadedFotos.push(url); done++;
-    }
-
-    // Upload PDF baru
-    if(exPdfFile){
-      progWrap.style.display='block';
-      progLbl.textContent='Mengupload PDF legalitas…';
-      finalPdf = await uploadFile(exPdfFile, 'existing/pdf/'+Date.now()+'_'+exPdfFile.name, pct=>{
-        progBar.style.width=Math.round((done/totalFiles*100)+(pct/totalFiles))+'%';
-      });
-      done++;
     }
     progBar.style.width='100%';
 
@@ -1715,7 +1750,7 @@ window.saveExisting = async function(){
         h5:Number(document.getElementById('exH5').value)||0,
       },
       fotos: uploadedFotos,
-      pdf: finalPdf,
+      docs: exDocs.filter(d=>!d.uploading).map(d=>({label:d.label, url:d.url})),
       updatedAt: now,
     };
 
