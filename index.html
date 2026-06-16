@@ -1518,6 +1518,25 @@ function exCardHTML(r){
   </div>`;
 }
 
+
+/* ── BUILD DOCS HTML (helper untuk detail) ── */
+function buildDocsHTML(r){
+  const docs = [...(r.docs||[])];
+  if(r.pdf && !docs.find(d=>d.url===r.pdf)) docs.unshift({label:'Legalitas', url:r.pdf});
+  if(!docs.length) return '';
+  let html = '<div style="margin-bottom:12px">';
+  html += '<div style="font-size:11px;font-weight:700;color:#C0543A;text-transform:uppercase;letter-spacing:.6px;margin-bottom:7px">📁 Dokumen</div>';
+  docs.forEach(d => {
+    const viewUrl = 'https://docs.google.com/viewer?url='+encodeURIComponent(d.url)+'&embedded=true';
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;background:#fdf6f2;border:1px solid #EDD9D0;border-radius:8px;padding:8px 11px;margin-bottom:5px">';
+    html += '<div style="display:flex;align-items:center;gap:7px"><span style="font-size:16px">📄</span>';
+    html += '<span style="font-size:13px;font-weight:600;color:#2C1810">'+esc(d.label)+'</span></div>';
+    html += '<a href="'+viewUrl+'" target="_blank" class="doc-btn-view">👁 Lihat</a></div>';
+  });
+  html += '</div>';
+  return html;
+}
+
 /* ── DETAIL ── */
 window.openExistingDetail = function(key){
   const r = EXISTING[key]; if(!r) return;
@@ -1543,21 +1562,8 @@ window.openExistingDetail = function(key){
       <div style="font-size:18px;font-weight:800;color:#C0543A;margin-bottom:4px">${esc(r.nama||'')}</div>
       <div style="font-size:13px;color:var(--muted)">📍 ${esc(r.alamat||'')}</div>
     </div>
-    ${r.maps?`<div style="margin-bottom:10px"><a class="btn-maps" href="${esc(r.maps)}" target="_blank">📍 Buka Google Maps</a></div>`:''}
-    ${(()=>{
-      const docs = r.docs||[];
-      // legacy support
-      if(r.pdf && !docs.find(d=>d.url===r.pdf)) docs.unshift({label:'Legalitas',url:r.pdf});
-      if(!docs.length) return '';
-      return '<div style="margin-bottom:12px"><div style="font-size:11px;font-weight:700;color:#C0543A;text-transform:uppercase;letter-spacing:.6px;margin-bottom:7px">📁 Dokumen</div>'
-        + docs.map(d=>`<div style="display:flex;align-items:center;justify-content:space-between;background:#fdf6f2;border:1px solid #EDD9D0;border-radius:8px;padding:8px 11px;margin-bottom:5px">
-          <div style="display:flex;align-items:center;gap:7px">
-            <span style="font-size:16px">📄</span>
-            <span style="font-size:13px;font-weight:600;color:#2C1810">${esc(d.label)}</span>
-          </div>
-          <a href="https://docs.google.com/viewer?url=${encodeURIComponent(d.url)}&embedded=true" target="_blank" class="doc-btn-view">👁 Lihat</a>
-        </div>`).join('') + '</div>';
-    })()}
+    ${r.maps?'<div style="margin-bottom:10px"><a class="btn-maps" href="'+esc(r.maps)+'" target="_blank">📍 Buka Google Maps</a></div>':''}
+    ${buildDocsHTML(r)}
     <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:8px;text-transform:uppercase;letter-spacing:.6px">💰 Harga per Tahun</div>
     <table class="ex-price-table" style="border-radius:10px;overflow:hidden">
       <thead><tr><th>Tahun</th><th>Harga</th></tr></thead>
