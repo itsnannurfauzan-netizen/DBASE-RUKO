@@ -1,0 +1,1861 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=5.0, user-scalable=yes">
+<title>Dental Rakyat – Database Ruko</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#C0543A;--navy2:#A03E28;--gold:#E8855A;
+  --bg:#FDF6F2;--white:#fff;--text:#2C1810;--muted:#8C7B75;
+  --border:#EDD9D0;--red:#dc2626;--redbg:#fee2e2;
+  --green:#16a34a;--greenbg:#dcfce7;--amber:#C0543A;--amberbg:#fdf0eb;
+  --r:14px;--rs:8px;--sh:0 2px 16px rgba(0,0,0,.08);--shh:0 10px 32px rgba(0,0,0,.15)
+}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.5}
+
+/* LOGIN */
+.login-screen{position:fixed;inset:0;background:linear-gradient(135deg,#C0543A 0%,#8B3320 100%);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px}
+.login-box{background:white;border-radius:20px;padding:36px 30px;width:100%;max-width:360px;box-shadow:0 24px 64px rgba(0,0,0,.3);text-align:center}
+.login-icon{width:60px;height:60px;background:#F2A882;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 14px}
+.login-title{font-size:21px;font-weight:800;color:var(--navy);margin-bottom:4px}
+.login-sub{font-size:13px;color:var(--muted);margin-bottom:22px}
+.login-input{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:var(--rs);font-size:14px;font-family:inherit;outline:none;margin-bottom:10px;transition:border-color .2s}
+.login-input:focus{border-color:#C0543A}
+.login-btn{width:100%;padding:12px;background:#C0543A;color:white;border:none;border-radius:var(--rs);font-size:14px;font-weight:800;cursor:pointer;font-family:inherit}
+.login-btn:hover{background:#A03E28}
+.login-err{color:var(--red);font-size:12px;margin-top:6px;display:none}
+.login-hint{font-size:11px;color:#ccc;margin-top:14px}
+.mode-btn{background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;text-decoration:underline;margin-top:6px;font-family:inherit}
+
+/* SYNC */
+.sync-dot{width:8px;height:8px;border-radius:50%;background:#6b7280;display:inline-block;margin-right:5px;flex-shrink:0}
+.sync-dot.connected{background:#6ee7b7;box-shadow:0 0 5px #6ee7b7}
+.sync-dot.connecting{background:#f59e0b;animation:pulse 1s infinite}
+.sync-dot.error{background:#ef4444}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* HEADER */
+.header{background:linear-gradient(135deg,#C0543A 0%,#8B3320 100%);padding:18px 20px 14px;color:white;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(27,43,75,.4)}
+.header-inner{max-width:1100px;margin:0 auto}
+.header-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:11px}
+.brand-icon{width:40px;height:40px;background:#F2A882;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+.brand-title{font-size:18px;font-weight:800;letter-spacing:-.5px;line-height:1.2}
+.brand-sub{font-size:11px;opacity:.6;margin-top:1px;display:flex;align-items:center;gap:4px}
+.header-right{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.btn-add{background:#F2A882;color:#2C1810;border:none;padding:9px 16px;border-radius:var(--rs);font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap;transition:transform .15s}
+.btn-add:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(192,84,58,.4)}
+.btn-logout{background:rgba(255,255,255,.18);color:white;border:1px solid rgba(255,255,255,.25);padding:7px 12px;border-radius:var(--rs);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
+.btn-export-hdr{background:rgba(255,255,255,.15);color:white;border:1px solid rgba(255,255,255,.25);padding:7px 12px;border-radius:var(--rs);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
+.stats-bar{display:flex;gap:7px;margin-top:10px;flex-wrap:wrap}
+.stat-chip{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:9px;padding:7px 13px}
+.stat-lbl{font-size:10px;opacity:.65;text-transform:uppercase;letter-spacing:.8px}
+.stat-val{font-size:16px;font-weight:800;color:#F2A882;display:block;margin-top:1px}
+
+/* TABS */
+.tab-bar{background:var(--white);border-bottom:2px solid var(--border);padding:0 20px;position:sticky;top:104px;z-index:89;display:flex;overflow-x:auto}
+@media(max-width:640px){.tab-bar{top:128px}}
+.tab-btn{padding:11px 18px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;font-family:inherit;transition:color .15s}
+.tab-btn.active{color:#C0543A;border-bottom-color:#C0543A}
+
+/* FILTER BAR */
+.filter-bar{background:var(--white);border-bottom:1px solid var(--border);padding:10px 20px}
+.filter-inner{max-width:1100px;margin:0 auto;display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.search-wrap{flex:1;min-width:170px;position:relative}
+.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:13px;pointer-events:none}
+.filter-input{width:100%;padding:8px 10px 8px 32px;border:1.5px solid var(--border);border-radius:var(--rs);font-size:13px;font-family:inherit;background:white;color:var(--text);outline:none;transition:border-color .2s}
+.filter-input:focus{border-color:#C0543A}
+.filter-select{padding:8px 10px;border:1.5px solid var(--border);border-radius:var(--rs);font-size:13px;font-family:inherit;background:white;color:var(--text);cursor:pointer;outline:none}
+.view-toggle{display:flex;gap:3px}
+.view-btn{width:32px;height:32px;border:1.5px solid var(--border);border-radius:var(--rs);background:white;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.view-btn.active{background:#C0543A;border-color:#C0543A;color:white}
+
+/* MAIN */
+.main{max-width:1100px;margin:0 auto;padding:16px 14px 40px}
+.tab-panel{display:none}.tab-panel.active{display:block}
+
+/* GRID */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:15px}
+@media(max-width:640px){.grid{grid-template-columns:1fr;gap:11px}}
+.list-view{display:flex;flex-direction:column;gap:9px}
+
+/* CARD */
+.card{background:white;border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);transition:transform .2s,box-shadow .2s;cursor:pointer;display:flex;flex-direction:column}
+.card:hover{transform:translateY(-3px);box-shadow:var(--shh)}
+.card-img-wrap{position:relative;height:165px;overflow:hidden;background:#e5e7eb;flex-shrink:0}
+.card-img{width:100%;height:100%;object-fit:cover;transition:transform .3s}
+.card:hover .card-img{transform:scale(1.04)}
+.img-count{position:absolute;bottom:7px;left:7px;background:rgba(0,0,0,.55);color:white;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px}
+.badge-status{position:absolute;top:9px;left:9px;font-size:10px;font-weight:800;padding:3px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:.8px;color:white}
+.badge-trend{position:absolute;bottom:9px;right:9px;display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:700;padding:3px 8px;border-radius:18px}
+.card-body{padding:12px 14px 14px;flex:1;display:flex;flex-direction:column}
+.card-name{font-size:14px;font-weight:700;color:#C0543A;line-height:1.3;margin-bottom:2px}
+.card-wilayah{font-size:11px;color:var(--muted);margin-bottom:5px}
+.card-tags{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:5px}
+.card-tag{font-size:10px;font-weight:600;padding:2px 7px;border-radius:9px;background:#fdf0eb;color:#C0543A}
+.card-alamat{font-size:11px;color:#555;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:8px;flex:1}
+.card-contact{font-size:11px;color:var(--muted);margin-bottom:8px}
+.card-price{font-size:17px;font-weight:800;color:#C0543A;line-height:1}
+.card-meta{font-size:11px;color:var(--muted);margin-top:2px;margin-bottom:9px}
+.card-actions{display:flex;gap:6px}
+.btn-sm{padding:7px 0;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;border:none;flex:1;transition:background .15s}
+.btn-sm-outline{padding:7px 0;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;border:1.5px solid #C0543A;background:transparent;color:#C0543A;flex:1}
+.btn-sm-outline:hover{background:#fdf0eb}
+.btn-sm-navy{background:#C0543A;color:white}
+.btn-sm-navy:hover{background:#A03E28}
+.btn-sm-amber{background:#fef3c7;color:var(--amber)}
+.btn-sm-amber:hover{background:#fde68a}
+.btn-sm-red{background:var(--redbg);color:var(--red);padding:7px 11px;flex:none}
+.btn-sm-share{background:#fdf0eb;color:#C0543A;border:1.5px solid #EDD9D0;padding:7px 11px;flex:none;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit}
+.btn-sm-share:hover{background:#f5e0d8}
+.btn-sm-red:hover{background:#fecaca}
+
+/* LIST CARD */
+.list-card{background:white;border-radius:var(--rs);box-shadow:var(--sh);display:flex;align-items:center;gap:12px;padding:10px 13px;cursor:pointer;transition:box-shadow .2s}
+.list-card:hover{box-shadow:var(--shh)}
+.list-thumb{width:72px;height:58px;border-radius:7px;object-fit:cover;flex-shrink:0}
+.list-info{flex:1;min-width:0}
+.list-name{font-size:13px;font-weight:700;color:#C0543A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.list-loc{font-size:11px;color:var(--muted);margin-top:2px}
+.list-right{text-align:right;flex-shrink:0}
+.list-price{font-size:14px;font-weight:800;color:#C0543A}
+.list-kenaikan{font-size:11px;margin-top:2px}
+.list-actions{display:flex;gap:5px;margin-top:5px;justify-content:flex-end}
+
+/* SKELETON */
+.skeleton-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:15px}
+@media(max-width:640px){.skeleton-grid{grid-template-columns:1fr}}
+.skel-card{background:white;border-radius:var(--r);overflow:hidden;box-shadow:var(--sh)}
+.skel-img{height:165px;background:#e5e7eb}
+.skel-body{padding:12px 14px}
+.skel-line{height:12px;border-radius:5px;background:#e5e7eb;margin-bottom:8px;animation:shimmer 1.4s infinite}
+.skel-line.s{width:50%}.skel-line.m{width:72%}
+@keyframes shimmer{0%{background:#e5e7eb}50%{background:#f3f4f6}100%{background:#e5e7eb}}
+
+/* EMPTY */
+.empty{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty-icon{font-size:44px;margin-bottom:11px}
+.empty-title{font-size:15px;font-weight:700;color:#aaa;margin-bottom:4px}
+
+/* MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;align-items:center;justify-content:center;padding:14px;animation:fadeIn .15s ease}
+.overlay.active{display:flex}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{transform:translateY(18px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal{background:white;border-radius:var(--r);width:100%;max-width:560px;max-height:92vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.28);animation:slideUp .2s ease}
+.modal-lg{max-width:620px}
+.modal-sm{max-width:400px}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:15px 20px 12px;border-bottom:1px solid var(--border);position:sticky;top:0;background:white;z-index:1}
+.modal-title{font-size:16px;font-weight:800;color:#C0543A}
+.btn-close{width:28px;height:28px;border:none;background:#f5f5f5;border-radius:6px;cursor:pointer;font-size:14px;color:#666;display:flex;align-items:center;justify-content:center}
+.btn-close:hover{background:#ebebeb}
+.modal-body{padding:16px 20px}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+@media(max-width:480px){.form-grid{grid-template-columns:1fr}}
+.fg{display:flex;flex-direction:column;gap:4px}
+.fg.full{grid-column:1/-1}
+.flbl{font-size:11px;font-weight:700;color:#C0543A;text-transform:uppercase;letter-spacing:.5px}
+.fi,.fs,.fta{padding:9px 11px;border:1.5px solid var(--border);border-radius:var(--rs);font-size:13px;font-family:inherit;color:var(--text);background:white;transition:border-color .2s;outline:none;width:100%}
+.fi:focus,.fs:focus,.fta:focus{border-color:#C0543A}
+.fta{resize:vertical;min-height:65px}
+.photos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:5px}
+.photo-thumb{position:relative;height:66px;border-radius:5px;overflow:hidden;background:#f3f4f6}
+.photo-thumb img{width:100%;height:100%;object-fit:cover}
+.photo-del{position:absolute;top:2px;right:2px;width:17px;height:17px;background:rgba(220,38,38,.85);color:white;border:none;border-radius:50%;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.tags-wrap{display:flex;flex-wrap:wrap;gap:5px;border:1.5px solid var(--border);border-radius:var(--rs);padding:5px 8px;min-height:38px;cursor:text;align-items:center}
+.tags-wrap:focus-within{border-color:#C0543A}
+.tag-chip{display:inline-flex;align-items:center;gap:3px;background:#fdf0eb;color:#C0543A;border-radius:10px;padding:2px 8px;font-size:11px;font-weight:600}
+.tag-chip button{background:none;border:none;cursor:pointer;color:var(--muted);font-size:12px;line-height:1;padding:0}
+.tag-ri{border:none;outline:none;font-size:13px;font-family:inherit;min-width:70px}
+.form-footer{display:flex;gap:9px;margin-top:16px;padding-top:13px;border-top:1px solid var(--border)}
+.btn-cancel{flex:1;padding:10px 0;border:1.5px solid var(--border);border-radius:var(--rs);background:white;color:var(--muted);font-weight:700;font-size:13px;cursor:pointer;font-family:inherit}
+.btn-save{flex:2;padding:10px 0;border:none;border-radius:var(--rs);background:#C0543A;color:white;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit}
+.btn-save:disabled{opacity:.6;cursor:not-allowed}
+.btn-save:hover:not(:disabled){background:#A03E28}
+
+/* DETAIL */
+.gallery{display:grid;gap:5px;margin-bottom:13px}
+.gallery img{width:100%;border-radius:7px;object-fit:cover;cursor:pointer}
+.gallery.one img{height:190px}
+.gallery.multi{grid-template-columns:1fr 1fr}
+.gallery.multi img{height:120px}
+.gallery.multi img:first-child{grid-column:1/-1;height:180px}
+.det-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:7px;gap:9px}
+.det-name{font-size:17px;font-weight:800;color:#C0543A;line-height:1.3}
+.det-loc{font-size:12px;color:var(--muted);margin-top:2px}
+.det-tags{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:7px}
+.det-tag{font-size:11px;font-weight:600;padding:2px 8px;border-radius:9px;background:#fdf0eb;color:#C0543A}
+.det-alamat{font-size:13px;color:#555;line-height:1.6;margin-bottom:5px}
+.det-contact{font-size:13px;color:#555;margin-bottom:13px}
+.det-contact a{color:var(--green);text-decoration:none;font-weight:600}
+.btn-wa{display:inline-flex;align-items:center;gap:5px;background:#25D366;color:white;border:none;padding:8px 14px;border-radius:var(--rs);font-size:12px;font-weight:700;cursor:pointer;text-decoration:none;margin-top:4px}
+.det-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;background:#fdf6f2;border-radius:9px;padding:13px;margin-bottom:11px}
+.det-ilbl{font-size:10px;color:#999;text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px}
+.det-ival{font-size:15px;font-weight:800;color:#C0543A}
+.det-isub{font-size:11px;color:#aaa;margin-top:1px}
+.history-box{background:#fdf6f2;border-radius:9px;padding:13px;margin-bottom:11px}
+.box-title{font-size:11px;font-weight:800;color:#C0543A;text-transform:uppercase;letter-spacing:.8px;margin-bottom:9px}
+.hist-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #eee;font-size:12px}
+.hist-row:last-child{border:none}
+.hist-date{color:var(--muted)}
+.hist-price{font-weight:700;color:var(--navy)}
+.hist-diff{font-size:10px;padding:1px 6px;border-radius:9px}
+.proyeksi-box{background:#fdf0eb;border:1px solid #EDD9D0;border-radius:9px;padding:13px;margin-bottom:11px}
+.proy-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.proy-row:last-child{margin-bottom:0}
+.proy-lbl{font-size:13px;color:#666}
+.proy-val{font-size:13px;font-weight:800;color:var(--navy)}
+.proy-val.gold{color:var(--gold)}
+.catatan-box{background:#fafafa;border:1px solid var(--border);border-radius:9px;padding:11px;margin-bottom:11px}
+.catatan-txt{font-size:13px;color:#555;line-height:1.6}
+.det-meta{font-size:11px;color:#bbb;text-align:right;margin-top:4px}
+
+/* DASHBOARD */
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:13px;margin-bottom:18px}
+.dash-card{background:white;border-radius:var(--r);padding:16px;box-shadow:var(--sh)}
+.dash-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px}
+.dash-val{font-size:24px;font-weight:800;color:#C0543A}
+.dash-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.chart-box{background:white;border-radius:var(--r);padding:16px;box-shadow:var(--sh);margin-bottom:14px}
+.chart-title{font-size:13px;font-weight:700;color:#C0543A;margin-bottom:13px}
+.bar-row{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+.bar-lbl{font-size:11px;color:var(--text);width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0}
+.bar-track{flex:1;height:20px;background:#f0f2f8;border-radius:5px;overflow:hidden}
+.bar-fill{height:100%;background:linear-gradient(90deg,#C0543A,#E8855A);border-radius:5px;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;transition:width .6s}
+.bar-fval{font-size:10px;font-weight:700;color:white;white-space:nowrap}
+.pie-row{display:flex;align-items:center;gap:9px;margin-bottom:7px}
+.pie-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0}
+.pie-lbl{font-size:13px;color:var(--text);flex:1}
+.pie-val{font-size:13px;font-weight:700;color:var(--navy)}
+.k-fill{height:100%;border-radius:5px;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;transition:width .6s}
+.dash-2col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:640px){.dash-2col{grid-template-columns:1fr}}
+
+/* DELETE */
+.del-body{text-align:center;padding:8px 0}
+.del-icon{font-size:40px;margin-bottom:9px}
+.del-title{font-size:16px;font-weight:800;color:#C0543A;margin-bottom:4px}
+.del-sub{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.5}
+.btn-conf-del{flex:1;padding:10px 0;border:none;border-radius:var(--rs);background:#dc2626;color:white;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit}
+
+/* LIGHTBOX */
+.lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9000;align-items:center;justify-content:center;flex-direction:column}
+.lightbox.active{display:flex}
+.lb-img{max-width:95vw;max-height:85vh;border-radius:7px;object-fit:contain}
+.lb-close{position:absolute;top:14px;right:14px;background:rgba(255,255,255,.2);border:none;color:white;width:36px;height:36px;border-radius:50%;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.lb-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.15);border:none;color:white;width:42px;height:42px;border-radius:50%;font-size:19px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.lb-prev{left:12px}.lb-next{right:12px}
+.lb-counter{color:rgba(255,255,255,.6);font-size:12px;margin-top:10px}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--navy);color:white;padding:10px 19px;border-radius:28px;font-size:13px;font-weight:600;z-index:9999;transition:transform .3s;box-shadow:0 8px 24px rgba(0,0,0,.25);white-space:nowrap;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+
+/* EXISTING RUKO */
+.ex-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px}
+.ex-title{font-size:17px;font-weight:800;color:#C0543A}
+.ex-sub{font-size:13px;color:var(--muted);margin-top:2px}
+.ex-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+@media(max-width:640px){.ex-grid{grid-template-columns:1fr}}
+.ex-card{background:white;border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;cursor:pointer;transition:transform .2s,box-shadow .2s}
+.ex-card:hover{transform:translateY(-3px);box-shadow:var(--shh)}
+.ex-card-img{width:100%;height:170px;object-fit:cover;display:block}
+.ex-card-body{padding:14px 15px 15px}
+.ex-card-name{font-size:15px;font-weight:800;color:#C0543A;margin-bottom:3px}
+.ex-card-addr{font-size:12px;color:var(--muted);margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ex-price-row{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:12px}
+.ex-yr{background:#f8f9ff;border-radius:6px;padding:5px 4px;text-align:center}
+.ex-yr-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+.ex-yr-val{font-size:11px;font-weight:800;color:#C0543A;margin-top:1px;white-space:nowrap}
+.ex-badges{display:flex;gap:6px;flex-wrap:wrap}
+.ex-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:4px 9px;border-radius:8px;cursor:pointer;text-decoration:none;border:none;font-family:inherit}
+.ex-badge-maps{background:#e8f5e9;color:#2e7d32}
+.ex-badge-pdf{background:#fff3e0;color:#e65100}
+.ex-badge-maps:hover{background:#c8e6c9}
+.ex-badge-pdf:hover{background:#ffe0b2}
+.ex-card-actions{display:flex;gap:7px;margin-top:10px}
+.upload-zone{border:2px dashed var(--border);border-radius:10px;padding:22px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;margin-top:6px}
+.upload-zone:hover{border-color:#C0543A;background:#fdf0eb}
+.upload-zone.dragover{border-color:#C0543A;background:#fdf0eb}
+.upload-icon{font-size:28px;margin-bottom:6px}
+.upload-text{font-size:13px;font-weight:600;color:var(--navy)}
+.upload-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.upload-preview{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.up-thumb{position:relative;width:72px;height:72px;border-radius:7px;overflow:hidden;border:1px solid var(--border)}
+.up-thumb img{width:100%;height:100%;object-fit:cover}
+.up-thumb-del{position:absolute;top:2px;right:2px;width:18px;height:18px;background:rgba(220,38,38,.85);color:white;border:none;border-radius:50%;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.up-thumb-prog{position:absolute;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white}
+.ex-det-gallery{display:grid;gap:6px;margin-bottom:14px}
+.ex-det-gallery.one img{width:100%;height:200px;object-fit:cover;border-radius:8px;cursor:pointer}
+.ex-det-gallery.multi{grid-template-columns:1fr 1fr}
+.ex-det-gallery.multi img{height:130px;object-fit:cover;border-radius:8px;cursor:pointer;width:100%}
+.ex-det-gallery.multi img:first-child{grid-column:1/-1;height:190px}
+.ex-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;background:#f8f9ff;border-radius:10px;padding:14px;margin-bottom:12px}
+.ex-info-item-lbl{font-size:10px;color:#999;text-transform:uppercase;letter-spacing:.7px;margin-bottom:2px}
+.ex-info-item-val{font-size:14px;font-weight:700;color:var(--navy)}
+.ex-price-table{width:100%;border-collapse:collapse;margin-bottom:12px}
+.ex-price-table th{background:#C0543A;color:white;font-size:11px;font-weight:700;padding:8px 12px;text-align:left}
+.ex-price-table td{padding:8px 12px;border-bottom:1px solid #f0f2f8;font-size:13px}
+.ex-price-table tr:last-child td{border-bottom:none}
+.ex-price-table tr:hover td{background:#f8f9ff}
+.ex-price-kenaikan{font-size:11px;padding:2px 7px;border-radius:10px;margin-left:6px}
+.ex-docs-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.btn-maps{display:inline-flex;align-items:center;gap:6px;background:#e8f5e9;color:#2e7d32;border:none;padding:10px 16px;border-radius:var(--rs);font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;font-family:inherit}
+.btn-maps:hover{background:#c8e6c9}
+.btn-pdf{display:inline-flex;align-items:center;gap:6px;background:#fff3e0;color:#e65100;border:none;padding:10px 16px;border-radius:var(--rs);font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;font-family:inherit}
+.btn-pdf:hover{background:#ffe0b2}
+.ex-empty{text-align:center;padding:50px 20px;color:var(--muted)}
+
+.guest-badge{display:none;margin-left:7px;background:rgba(255,255,255,.2);padding:1px 8px;border-radius:9px;font-size:10px}
+
+/* EKSPANSI */
+.eksp-intro{background:linear-gradient(135deg,#C0543A,#8B3320);color:white;border-radius:14px;padding:20px 22px;margin-bottom:18px}
+.eksp-intro-title{font-size:18px;font-weight:800;margin-bottom:4px}
+.eksp-intro-sub{font-size:13px;opacity:.75;line-height:1.6}
+.eksp-legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.eksp-leg-item{display:flex;align-items:center;gap:6px;background:white;border-radius:8px;padding:6px 12px;box-shadow:0 1px 4px rgba(0,0,0,.07);font-size:12px;font-weight:600}
+.eksp-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.eksp-filter-sel{padding:8px 11px;border:1.5px solid var(--border);border-radius:var(--rs);font-size:13px;font-family:inherit;background:white;cursor:pointer;outline:none}
+.eksp-filter-sel:focus{border-color:#C0543A}
+.eksp-search{padding:8px 11px;border:1.5px solid var(--border);border-radius:var(--rs);font-size:13px;font-family:inherit;background:white;outline:none;min-width:160px}
+.eksp-search:focus{border-color:#C0543A}
+.eksp-count{font-size:12px;color:var(--muted);margin-left:4px}
+.eksp-table-wrap{background:white;border-radius:14px;box-shadow:var(--sh);overflow:hidden;margin-bottom:18px}
+.eksp-table{width:100%;border-collapse:collapse;font-size:13px}
+.eksp-table thead tr{background:#C0543A;color:white}
+.eksp-table thead th{padding:11px 13px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;white-space:nowrap}
+.eksp-table thead th:first-child{border-radius:0}
+.eksp-table tbody tr{border-bottom:1px solid #f0f2f8;transition:background .15s;cursor:pointer}
+.eksp-table tbody tr:last-child{border-bottom:none}
+.eksp-table tbody tr:hover{background:#f8f9ff}
+.eksp-table td{padding:10px 13px;vertical-align:middle}
+.rank-badge{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;margin:0 auto}
+.score-bar{display:flex;align-items:center;gap:7px}
+.score-track{flex:1;height:6px;background:#f0f2f8;border-radius:3px;overflow:hidden;min-width:50px}
+.score-fill{height:100%;border-radius:3px}
+.score-num{font-size:12px;font-weight:800;color:var(--navy);width:26px;text-align:right;flex-shrink:0}
+.cat-badge{display:inline-block;padding:3px 9px;border-radius:10px;font-size:11px;font-weight:700;white-space:nowrap}
+.pulau-tag{background:#fdf0eb;color:#C0543A;padding:2px 8px;border-radius:9px;font-size:11px;font-weight:600}
+.score-mini{display:flex;gap:4px;flex-wrap:wrap}
+.score-mini-item{font-size:10px;color:var(--muted);background:#f8f8f8;padding:2px 7px;border-radius:6px;white-space:nowrap}
+.score-mini-item span{font-weight:700;color:var(--text)}
+.eksp-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:18px}
+.eksp-card{background:white;border-radius:12px;box-shadow:var(--sh);padding:16px;cursor:pointer;transition:transform .15s,box-shadow .15s;border-left:4px solid transparent}
+.eksp-card:hover{transform:translateY(-2px);box-shadow:var(--shh)}
+.eksp-card-rank{font-size:11px;font-weight:700;color:var(--muted);margin-bottom:3px}
+.eksp-card-name{font-size:15px;font-weight:800;color:var(--navy);margin-bottom:4px}
+.eksp-card-pulau{font-size:11px;color:var(--muted);margin-bottom:10px}
+.eksp-card-scores{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
+.eksp-score-item{background:#f8f9ff;border-radius:7px;padding:6px 8px}
+.eksp-score-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+.eksp-score-val{font-size:14px;font-weight:800;color:var(--navy)}
+.eksp-score-bar{height:3px;border-radius:2px;margin-top:3px;background:#e5e7eb;overflow:hidden}
+.eksp-score-bar-fill{height:100%;border-radius:2px}
+.eksp-total{display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px solid #f0f2f8}
+.eksp-total-lbl{font-size:11px;color:var(--muted)}
+.eksp-total-val{font-size:20px;font-weight:800;color:var(--navy)}
+.view-mode-btns{display:flex;gap:4px}
+.view-mode-btn{padding:6px 12px;border:1.5px solid var(--border);border-radius:var(--rs);background:white;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
+.view-mode-btn.active{background:#C0543A;border-color:#C0543A;color:white}
+@media(max-width:768px){
+  .eksp-table-wrap{overflow-x:auto}
+  .eksp-table{min-width:600px}
+  .eksp-cards{grid-template-columns:1fr}
+}
+
+@media(max-width:480px){
+  .header{padding:13px 13px 10px}.brand-title{font-size:16px}
+  .main{padding:11px 10px 30px}.card-img-wrap{height:150px}
+  .list-thumb{width:60px;height:50px}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <div class="login-icon">🦷</div>
+    <div class="login-title">Dental Rakyat</div>
+    <div class="login-sub">Database Ruko Dental Rakyat</div>
+    <input class="login-input" id="loginPass" type="password" placeholder="Masukkan password…" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">Masuk →</button>
+    <div class="login-err" id="loginErr">Password salah, coba lagi.</div>
+    <div class="login-hint">Mode Tamu: hanya bisa lihat data</div>
+    <button class="mode-btn" onclick="loginGuest()">Masuk sebagai Tamu (Read-Only)</button>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header class="header" id="appHeader" style="display:none">
+  <div class="header-inner">
+    <div class="header-top">
+      <div class="brand">
+        <div class="brand-icon">🦷</div>
+        <div>
+          <div class="brand-title">Dental Rakyat — Database Ruko</div>
+          <div class="brand-sub">
+            <span class="sync-dot connecting" id="syncDot"></span>
+            <span id="syncLabel">Menghubungkan…</span>
+            <span class="guest-badge" id="guestBadge">👁 Tamu</span>
+          </div>
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="btn-export-hdr" onclick="exportCSV()">📥 Export CSV</button>
+        <button class="btn-add" id="btnAdd" onclick="openAdd()">+ Tambah Ruko</button>
+        <button class="btn-logout" onclick="doLogout()">Keluar</button>
+      </div>
+    </div>
+    <div class="stats-bar">
+      <div class="stat-chip"><div class="stat-lbl">Total</div><span class="stat-val" id="statTotal">—</span></div>
+      <div class="stat-chip"><div class="stat-lbl">Total Nilai</div><span class="stat-val" id="statNilai">—</span></div>
+      <div class="stat-chip"><div class="stat-lbl">Review MoU</div><span class="stat-val" id="statDijual">—</span></div>
+      <div class="stat-chip"><div class="stat-lbl">MoU Disetujui</div><span class="stat-val" id="statDisewa">—</span></div>
+    </div>
+  </div>
+</header>
+
+<!-- FILTER + TABS inside same sticky wrapper -->
+<div id="appBars" style="display:none;position:sticky;top:104px;z-index:89">
+  <div class="filter-bar" style="position:static">
+    <div class="filter-inner">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input class="filter-input" id="searchInput" type="text" placeholder="Cari nama, wilayah, tag…" oninput="renderCards()">
+      </div>
+      <select class="filter-select" id="filterStatus" onchange="renderCards()">
+        <option value="">Semua Status</option>
+        <option>Review MoU</option><option>MoU Disetujui</option><option>MoU Ditolak</option><option>Pending Pembayaran</option><option>Sold</option><option>DONE</option>
+      </select>
+      <select class="filter-select" id="sortBy" onchange="renderCards()">
+        <option value="nama">Nama A-Z</option>
+        <option value="harga_asc">Harga ↑</option>
+        <option value="harga_desc">Harga ↓</option>
+        <option value="kenaikan">Kenaikan ↓</option>
+        <option value="terbaru">Terbaru</option>
+      </select>
+      <div class="view-toggle">
+        <button class="view-btn active" id="btnGrid" onclick="setView('grid')" title="Grid">⊞</button>
+        <button class="view-btn" id="btnList" onclick="setView('list')" title="List">☰</button>
+      </div>
+    </div>
+  </div>
+  <div class="tab-bar" style="position:static">
+    <button class="tab-btn active" onclick="switchTab('listing',this)">🏢 Listing</button>
+    <button class="tab-btn" onclick="switchTab('dashboard',this)">📊 Dashboard</button>
+    <button class="tab-btn" onclick="switchTab('ekspansi',this)">🗺️ Rekomendasi Ekspansi</button>
+    <button class="tab-btn" onclick="switchTab('existing',this)">📍 Ruko Existing</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<main class="main" id="appMain" style="display:none">
+  <!-- LISTING TAB -->
+  <div class="tab-panel active" id="tab-listing">
+    <div class="skeleton-grid" id="skeletonGrid">
+      <div class="skel-card"><div class="skel-img"></div><div class="skel-body"><div class="skel-line m"></div><div class="skel-line s"></div><div class="skel-line"></div></div></div>
+      <div class="skel-card"><div class="skel-img"></div><div class="skel-body"><div class="skel-line m"></div><div class="skel-line s"></div><div class="skel-line"></div></div></div>
+      <div class="skel-card"><div class="skel-img"></div><div class="skel-body"><div class="skel-line m"></div><div class="skel-line s"></div><div class="skel-line"></div></div></div>
+    </div>
+    <div class="grid" id="cardGrid" style="display:none"></div>
+    <div class="empty" id="emptyState" style="display:none">
+      <div class="empty-icon">🏗️</div>
+      <div class="empty-title">Tidak ada listing ditemukan</div>
+      <div style="font-size:13px">Coba ubah filter atau klik "+ Tambah Ruko"</div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD TAB -->
+  <div class="tab-panel" id="tab-dashboard">
+    <div class="dash-grid" id="dashCards"></div>
+    <div class="dash-2col">
+      <div class="chart-box"><div class="chart-title">💰 Harga Rata-rata per Wilayah</div><div id="chartHarga"></div></div>
+      <div class="chart-box"><div class="chart-title">📊 Distribusi Status</div><div id="chartStatus"></div></div>
+    </div>
+    <div class="chart-box"><div class="chart-title">📈 Kenaikan Harga per Listing</div><div id="chartKenaikan"></div></div>
+  </div>
+
+
+  <!-- EXISTING RUKO TAB -->
+  <div class="tab-panel" id="tab-existing">
+    <div id="existingContent">
+      <div class="skel-card" style="border-radius:14px;padding:20px;margin-bottom:14px"><div class="skel-line m"></div><div class="skel-line s"></div></div>
+    </div>
+  </div>
+
+  <!-- EKSPANSI TAB -->
+  <div class="tab-panel" id="tab-ekspansi" style="padding-bottom:20px">
+    <div id="ekspansiContent"></div>
+  </div>
+</main>
+
+
+<!-- MODAL: EXISTING RUKO FORM -->
+<div class="overlay" id="existingFormOverlay" onclick="closeOnBg(event,'existingFormOverlay')">
+  <div class="modal modal-lg">
+    <div class="modal-head">
+      <div class="modal-title" id="existingFormTitle">Tambah Ruko Existing</div>
+      <button class="btn-close" onclick="closeModal('existingFormOverlay')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="exFormId">
+      <div class="form-grid">
+        <div class="fg full"><label class="flbl">Nama Lokasi *</label><input class="fi" id="exNama" placeholder="cth. Ruko Jalan Merdeka No.5"></div>
+        <div class="fg full"><label class="flbl">Alamat Lengkap *</label><textarea class="fta" id="exAlamat" placeholder="Jl. Merdeka No.5, Kel. ..., Kec. ..., Kota ..."></textarea></div>
+        <div class="fg full">
+          <label class="flbl">Titik Google Maps (URL atau koordinat)</label>
+          <input class="fi" id="exMaps" placeholder="cth. https://maps.app.goo.gl/xxx atau -6.200000,106.816666">
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">💡 Buka Google Maps → tahan titik lokasi → copy link Share atau koordinat</div>
+        </div>
+        <div class="fg full">
+          <label class="flbl">Harga per Tahun (Rp)</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
+            <div><div style="font-size:11px;color:var(--muted);margin-bottom:3px">Tahun 1</div><input class="fi" id="exH1" type="number" placeholder="cth. 50000000"></div>
+            <div><div style="font-size:11px;color:var(--muted);margin-bottom:3px">Tahun 2</div><input class="fi" id="exH2" type="number" placeholder="cth. 52000000"></div>
+            <div><div style="font-size:11px;color:var(--muted);margin-bottom:3px">Tahun 3</div><input class="fi" id="exH3" type="number" placeholder="cth. 55000000"></div>
+            <div><div style="font-size:11px;color:var(--muted);margin-bottom:3px">Tahun 4</div><input class="fi" id="exH4" type="number" placeholder="cth. 57000000"></div>
+            <div><div style="font-size:11px;color:var(--muted);margin-bottom:3px">Tahun 5</div><input class="fi" id="exH5" type="number" placeholder="cth. 60000000"></div>
+          </div>
+        </div>
+        <div class="fg full">
+          <label class="flbl">Foto Ruko (bisa lebih dari 1, max 5MB/foto)</label>
+          <div class="upload-zone" id="exFotoZone" onclick="document.getElementById('exFotoInput').click()">
+            <div class="upload-icon">📷</div>
+            <div class="upload-text">Klik atau drag foto ke sini</div>
+            <div class="upload-sub">JPG, PNG — max 5MB per foto</div>
+          </div>
+          <input type="file" id="exFotoInput" accept="image/*" multiple style="display:none" onchange="handleFotoSelect(event)">
+          <div class="upload-preview" id="exFotoPreview"></div>
+        </div>
+        <div class="fg full">
+          <label class="flbl">File PDF Legalitas (max 10MB)</label>
+          <div id="exPdfExisting" style="display:none;background:#fdf0eb;border:1.5px solid #EDD9D0;border-radius:10px;padding:12px 14px;display:none;align-items:center;justify-content:space-between;gap:10px">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:20px">📄</span>
+              <div>
+                <div style="font-size:13px;font-weight:700;color:#C0543A">File Legalitas Tersimpan</div>
+                <a id="exPdfExistingLink" href="" target="_blank" style="font-size:11px;color:#A03E28;text-decoration:underline">Lihat PDF</a>
+              </div>
+            </div>
+            <button onclick="removeExistingPdf()" style="background:#fee2e2;color:#dc2626;border:none;padding:6px 12px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer">🗑 Hapus</button>
+          </div>
+          <div id="exPdfUploadZone">
+            <div class="upload-zone" id="exPdfZone" onclick="document.getElementById('exPdfInput').click()">
+              <div class="upload-icon">📄</div>
+              <div class="upload-text" id="exPdfText">Klik untuk pilih file PDF</div>
+              <div class="upload-sub">PDF — max 10MB</div>
+            </div>
+          </div>
+          <input type="file" id="exPdfInput" accept=".pdf" style="display:none" onchange="handlePdfSelect(event)">
+        </div>
+      </div>
+      <!-- Upload Progress -->
+      <div id="uploadProgressWrap" style="display:none;margin-top:14px">
+        <div style="font-size:12px;font-weight:600;color:var(--navy);margin-bottom:6px" id="uploadProgressLabel">Mengupload…</div>
+        <div style="height:8px;background:#f0f2f8;border-radius:4px;overflow:hidden">
+          <div id="uploadProgressBar" style="height:100%;background:linear-gradient(90deg,var(--navy),var(--gold));border-radius:4px;width:0%;transition:width .3s"></div>
+        </div>
+      </div>
+      <div class="form-footer">
+        <button class="btn-cancel" onclick="closeModal('existingFormOverlay')">Batal</button>
+        <button class="btn-save" id="exSaveBtn" onclick="saveExisting()">💾 Simpan</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: EXISTING DETAIL -->
+<div class="overlay" id="existingDetailOverlay" onclick="closeOnBg(event,'existingDetailOverlay')">
+  <div class="modal modal-lg">
+    <div class="modal-head">
+      <div class="modal-title">Detail Ruko Existing</div>
+      <button class="btn-close" onclick="closeModal('existingDetailOverlay')">✕</button>
+    </div>
+    <div class="modal-body" id="existingDetailBody"></div>
+  </div>
+</div>
+
+<!-- MODAL: FORM -->
+<div class="overlay" id="formOverlay" onclick="closeOnBg(event,'formOverlay')">
+  <div class="modal modal-lg">
+    <div class="modal-head">
+      <div class="modal-title" id="formTitle">Tambah Listing Ruko</div>
+      <button class="btn-close" onclick="closeModal('formOverlay')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="formId">
+      <div class="form-grid">
+        <div class="fg full"><label class="flbl">Nama Ruko / Gedung *</label><input class="fi" id="fNama" placeholder="cth. Ruko Gajah Mada Center"></div>
+        <div class="fg"><label class="flbl">Wilayah / Kota *</label><input class="fi" id="fWilayah" placeholder="cth. Jakarta Barat"></div>
+        <div class="fg"><label class="flbl">Status</label><select class="fs" id="fStatus"><option>Review MoU</option><option>MoU Disetujui</option><option>MoU Ditolak</option><option>Pending Pembayaran</option><option>Sold</option><option>DONE</option></select></div>
+        <div class="fg full"><label class="flbl">Alamat Lengkap *</label><textarea class="fta" id="fAlamat" placeholder="Jl. ..., No. ..., Kecamatan, Kota"></textarea></div>
+        <div class="fg"><label class="flbl">Harga (Rp) *</label><input class="fi" id="fHarga" type="number" placeholder="cth. 4500000000"></div>
+        <div class="fg"><label class="flbl">Kenaikan / Tahun (%)</label><input class="fi" id="fKenaikan" type="number" step="0.1" placeholder="cth. 8.5"></div>
+        <div class="fg"><label class="flbl">Luas (m²)</label><input class="fi" id="fLuas" type="number" placeholder="cth. 120"></div>
+        <div class="fg"><label class="flbl">Jumlah Lantai</label><input class="fi" id="fLantai" type="number" placeholder="cth. 3"></div>
+        <div class="fg"><label class="flbl">Kontak Pemilik / Agen</label><input class="fi" id="fKontak" placeholder="cth. Budi Santoso"></div>
+        <div class="fg"><label class="flbl">No. WhatsApp</label><input class="fi" id="fWa" type="tel" placeholder="cth. 08123456789"></div>
+        <div class="fg full">
+          <label class="flbl">Titik Google Maps (URL)</label>
+          <input class="fi" id="fMaps" type="url" placeholder="cth. https://maps.app.goo.gl/xxx">
+          <div style="font-size:11px;color:var(--muted);margin-top:3px">💡 Buka Google Maps → tahan titik lokasi → klik Share → copy link</div>
+        </div>
+        <div class="fg full">
+          <label class="flbl">Label / Tag (Enter atau koma untuk tambah)</label>
+          <div class="tags-wrap" id="tagsWrap" onclick="document.getElementById('tagRI').focus()">
+            <span id="tagChips"></span>
+            <input id="tagRI" class="tag-ri" placeholder="cth. Strategis" onkeydown="handleTagKey(event)" oninput="handleTagInput(event)">
+          </div>
+        </div>
+        <div class="fg full"><label class="flbl">Catatan / Keterangan</label><textarea class="fta" id="fCatatan" placeholder="cth. Lokasi strategis di depan pasar…"></textarea></div>
+        <div class="fg full">
+          <label class="flbl">Foto Ruko (bisa lebih dari 1, max 5MB/foto)</label>
+          <div class="upload-zone" id="listingFotoZone" onclick="document.getElementById('listingFotoInput').click()">
+            <div class="upload-icon">📷</div>
+            <div class="upload-text">Klik atau drag foto ke sini</div>
+            <div class="upload-sub">JPG, PNG — max 5MB per foto</div>
+          </div>
+          <input type="file" id="listingFotoInput" accept="image/*" multiple style="display:none" onchange="handleListingFotoSelect(event)">
+          <div class="upload-preview" id="listingFotoPreview"></div>
+        </div>
+      </div>
+      <div class="form-footer">
+        <button class="btn-cancel" onclick="closeModal('formOverlay')">Batal</button>
+        <button class="btn-save" id="formSaveBtn" onclick="saveForm()">Simpan</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: DETAIL -->
+<div class="overlay" id="detailOverlay" onclick="closeOnBg(event,'detailOverlay')">
+  <div class="modal modal-lg">
+    <div class="modal-head">
+      <div class="modal-title">Detail Properti</div>
+      <button class="btn-close" onclick="closeModal('detailOverlay')">✕</button>
+    </div>
+    <div class="modal-body" id="detailBody"></div>
+  </div>
+</div>
+
+<!-- MODAL: DELETE -->
+<div class="overlay" id="deleteOverlay" onclick="closeOnBg(event,'deleteOverlay')">
+  <div class="modal modal-sm">
+    <div class="modal-head">
+      <div class="modal-title">Konfirmasi Hapus</div>
+      <button class="btn-close" onclick="closeModal('deleteOverlay')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="del-body">
+        <div class="del-icon">⚠️</div>
+        <div class="del-title">Hapus listing ini?</div>
+        <div class="del-sub" id="deleteMsg"></div>
+        <div class="form-footer" style="margin-top:0;padding-top:0;border:none">
+          <button class="btn-cancel" onclick="closeModal('deleteOverlay')">Batal</button>
+          <button class="btn-conf-del" id="confirmDelBtn">Ya, Hapus</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lb-close" onclick="closeLightbox()">✕</button>
+  <button class="lb-nav lb-prev" onclick="event.stopPropagation();lbNav(-1)">‹</button>
+  <img class="lb-img" id="lbImg" src="" alt="" onclick="event.stopPropagation()">
+  <button class="lb-nav lb-next" onclick="event.stopPropagation();lbNav(1)">›</button>
+  <div class="lb-counter" id="lbCounter"></div>
+</div>
+
+<!-- MODAL: SHARE -->
+<div class="overlay" id="shareOverlay" onclick="closeOnBg(event,'shareOverlay')">
+  <div class="modal modal-sm">
+    <div class="modal-head">
+      <div class="modal-title">🔗 Share Listing Ruko</div>
+      <button class="btn-close" onclick="closeModal('shareOverlay')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="shareRukoPreview" style="background:#fdf6f2;border-radius:10px;padding:14px;margin-bottom:14px"></div>
+      <div style="margin-bottom:10px">
+        <div style="font-size:11px;font-weight:700;color:#C0543A;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Link Share</div>
+        <div style="display:flex;gap:8px">
+          <input id="shareLinkInput" readonly style="flex:1;padding:9px 11px;border:1.5px solid #EDD9D0;border-radius:8px;font-size:12px;font-family:inherit;background:#fdf6f2;color:#2C1810;outline:none">
+          <button onclick="copyShareLink()" style="background:#C0543A;color:white;border:none;padding:9px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap" id="copyLinkBtn">📋 Copy</button>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:14px">Teman bisa buka link ini langsung — data ruko tampil otomatis tanpa perlu login.</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <a id="shareWaBtn" href="" target="_blank" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:#25D366;color:white;border:none;padding:10px 0;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none">💬 WhatsApp</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, onValue, push, set, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey:            "AIzaSyBpd31pWOalGEEMEPBb2ZmSeW0BVcB7XcM",
+  authDomain:        "ruko-5b945.firebaseapp.com",
+  databaseURL:       "https://ruko-5b945-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:         "ruko-5b945",
+  storageBucket:     "ruko-5b945.firebasestorage.app",
+  messagingSenderId: "453276909500",
+  appId:             "1:453276909500:web:0eadb208fb98a69c5335b9"
+};
+
+/* ── PASSWORD (ganti sesuai kebutuhan) ── */
+const ADMIN_PASS = "ruko2024";
+
+/* ── CLOUDINARY CONFIG ── */
+const CLOUDINARY_CLOUD = "do9pf1s31";
+const CLOUDINARY_PRESET = "icc93up3";
+
+let DB = {}, EXISTING = {}, fbDb, isAdmin = false;
+let currentView = 'grid';
+let lbImages = [], lbIdx = 0;
+let formTags = [];
+
+/* ── HELPERS ── */
+const fmtRp = n => { n=Number(n); if(n>=1e9) return 'Rp '+(n/1e9).toFixed(2).replace(/\.?0+$/,'')+'M'; if(n>=1e6) return 'Rp '+Math.round(n/1e6)+' Jt'; return 'Rp '+n.toLocaleString('id-ID'); };
+const fmtFull = n => 'Rp '+Number(n).toLocaleString('id-ID');
+const fmtDate = ts => ts ? new Date(ts).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}) : '—';
+const scol = s => s==='Review MoU'?'#2563eb':s==='MoU Disetujui'?'#16a34a':s==='MoU Ditolak'?'#dc2626':s==='Pending Pembayaran'?'#d97706':s==='Sold'?'#C0543A':'#059669';
+const tcol = p => p>=10?{c:'#16a34a',bg:'#dcfce7'}:p>=7?{c:'#d97706',bg:'#fef3c7'}:{c:'#2563eb',bg:'#dbeafe'};
+const FALLBACK = 'https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600&q=80';
+const getFotos = r => (r.fotos?.length ? r.fotos.filter(Boolean) : r.gambar ? [r.gambar] : []);
+const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+/* ── LOGIN ── */
+window.doLogin = () => {
+  const p = document.getElementById('loginPass').value;
+  if(p === ADMIN_PASS){
+    isAdmin=true;
+    sessionStorage.setItem('ruko_session','admin');
+    startApp();
+  } else {
+    document.getElementById('loginErr').style.display='block';
+  }
+};
+window.loginGuest = () => {
+  isAdmin=false;
+  sessionStorage.setItem('ruko_session','guest');
+  startApp();
+};
+window.doLogout = () => {
+  sessionStorage.removeItem('ruko_session');
+  location.reload();
+};
+
+// Init Firebase sekali saja
+let _fbApp = null;
+function getFirebaseApp(){
+  if(_fbApp) return _fbApp;
+  try { _fbApp = initializeApp(firebaseConfig); }
+  catch(e){ _fbApp = e.app || _fbApp; }
+  return _fbApp;
+}
+
+function startApp() {
+  document.getElementById('loginScreen').style.display='none';
+  ['appHeader','appBars','appMain'].forEach(id=>document.getElementById(id).style.display='');
+  if(!isAdmin){ document.getElementById('btnAdd').style.display='none'; document.getElementById('guestBadge').style.display=''; }
+  setSyncStatus('connecting');
+  const app = getFirebaseApp();
+  fbDb = getDatabase(app);
+  // Listen existing ruko
+  onValue(ref(fbDb,'existing'), snap => { EXISTING=snap.val()||{}; if(document.getElementById('tab-existing').classList.contains('active')) renderExisting(); });
+  onValue(ref(fbDb,'ruko'), snap => {
+    DB = snap.val()||{};
+    setSyncStatus('connected');
+    renderStats(); renderCards();
+    if(document.getElementById('tab-dashboard').classList.contains('active')) renderDashboard();
+    checkShareUrl();
+  }, err => { setSyncStatus('error'); showToast('❌ '+err.message); });
+}
+
+/* ── AUTO LOGIN dari sesi tersimpan atau share link ── */
+(function checkSession(){
+  const s = sessionStorage.getItem('ruko_session');
+  const hasShareParam = new URLSearchParams(window.location.search).get('ruko');
+  if(s === 'admin'){ isAdmin=true; startApp(); }
+  else if(s === 'guest'){ isAdmin=false; startApp(); }
+  else if(hasShareParam){
+    // Auto guest login untuk penerima share link
+    isAdmin=false;
+    sessionStorage.setItem('ruko_session','guest');
+    startApp();
+  }
+})();
+
+/* ── SYNC ── */
+function setSyncStatus(s){
+  const dot=document.getElementById('syncDot'), lbl=document.getElementById('syncLabel');
+  dot.className='sync-dot '+s;
+  lbl.textContent = s==='connected'?'Terhubung & sinkron':s==='connecting'?'Menghubungkan…':'Gagal terhubung';
+}
+
+/* ── VIEW TOGGLE ── */
+window.setView = v => {
+  currentView=v;
+  document.getElementById('btnGrid').classList.toggle('active',v==='grid');
+  document.getElementById('btnList').classList.toggle('active',v==='list');
+  renderCards();
+};
+
+/* ── TABS ── */
+window.switchTab = (tab, btn) => {
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-'+tab).classList.add('active');
+  if(tab==='dashboard') renderDashboard();
+  if(tab==='ekspansi') renderEkspansi();
+  if(tab==='existing') renderExisting();
+};
+
+/* ── STATS ── */
+function renderStats(){
+  const list=Object.values(DB);
+  document.getElementById('statTotal').textContent=list.length;
+  document.getElementById('statNilai').textContent=fmtRp(list.reduce((s,r)=>s+Number(r.harga||0),0));
+  document.getElementById('statDijual').textContent=list.filter(r=>r.status==='Review MoU').length;
+  document.getElementById('statDisewa').textContent=list.filter(r=>r.status==='MoU Disetujui').length;
+}
+
+/* ── FILTER ── */
+function getFiltered(){
+  const q=document.getElementById('searchInput').value.toLowerCase();
+  const fs=document.getElementById('filterStatus').value;
+  const sort=document.getElementById('sortBy').value;
+  let list=Object.entries(DB).map(([k,v])=>({...v,_key:k})).filter(r=>
+    (!q||r.nama?.toLowerCase().includes(q)||r.wilayah?.toLowerCase().includes(q)||
+     r.alamat?.toLowerCase().includes(q)||(r.tags||[]).some(t=>t.toLowerCase().includes(q))) &&
+    (!fs||r.status===fs)
+  );
+  if(sort==='harga_asc') list.sort((a,b)=>a.harga-b.harga);
+  else if(sort==='harga_desc') list.sort((a,b)=>b.harga-a.harga);
+  else if(sort==='kenaikan') list.sort((a,b)=>b.kenaikan-a.kenaikan);
+  else if(sort==='terbaru') list.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  else list.sort((a,b)=>a.nama?.localeCompare(b.nama));
+  return list;
+}
+
+/* ── RENDER CARDS ── */
+window.renderCards = () => {
+  const list=getFiltered();
+  const grid=document.getElementById('cardGrid');
+  document.getElementById('skeletonGrid').style.display='none';
+  grid.style.display=currentView==='grid'?'grid':'flex';
+  grid.className=currentView==='grid'?'grid':'list-view';
+  document.getElementById('emptyState').style.display=list.length?'none':'block';
+  grid.innerHTML=list.length?(currentView==='grid'?list.map(cardHTML):list.map(listHTML)).join(''):'';
+};
+
+function cardHTML(r){
+  const tc=tcol(r.kenaikan||0), fotos=getFotos(r), thumb=fotos[0]||FALLBACK;
+  const tags=(r.tags||[]).map(t=>`<span class="card-tag">${esc(t)}</span>`).join('');
+  const adminBtns=isAdmin?`<button class="btn-sm btn-sm-navy" onclick="openEdit('${r._key}')">Edit</button>
+    <button class="btn-sm btn-sm-amber" onclick="dupListing('${r._key}')" title="Duplikat">⧉</button>
+    <button class="btn-sm btn-sm-red" onclick="openDelete('${r._key}')">🗑</button>`:'';
+  const isDimmed = r.status==='Sold'||r.status==='DONE';
+  return `<div class="card" onclick="openDetail('${r._key}')" style="${isDimmed?'opacity:0.5;filter:grayscale(30%)':''}">
+    <div class="card-img-wrap">
+      <img class="card-img" src="${esc(thumb)}" onerror="this.src='${FALLBACK}'" alt="">
+      ${fotos.length>1?`<span class="img-count">📷 ${fotos.length}</span>`:''}
+      <span class="badge-status" style="background:${scol(r.status)}">${esc(r.status)}</span>
+      <span class="badge-trend" style="background:${tc.bg};color:${tc.c}">▲ ${r.kenaikan||0}%/thn</span>
+    </div>
+    <div class="card-body">
+      <div class="card-name">${esc(r.nama)}</div>
+      <div class="card-wilayah">📍 ${esc(r.wilayah)}</div>
+      ${tags?`<div class="card-tags">${tags}</div>`:''}
+      <div class="card-alamat">${esc(r.alamat)}</div>
+      ${r.kontak?`<div class="card-contact">👤 ${esc(r.kontak)}${r.wa?` · 📱 ${esc(r.wa)}`:''}</div>`:''}
+      ${r.maps?`<div style="margin-bottom:6px"><a href="${esc(r.maps)}" target="_blank" onclick="event.stopPropagation()" style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:#2e7d32;background:#e8f5e9;padding:3px 9px;border-radius:8px;text-decoration:none">📍 Lihat Maps</a></div>`:''}
+      <div class="card-price">${fmtRp(r.harga)}</div>
+      <div class="card-meta">${r.luas||0}m² · ${r.lantai||0} lantai · ${fmtDate(r.updatedAt)}</div>
+      <div class="card-actions" onclick="event.stopPropagation()">
+        <button class="btn-sm-outline" onclick="openDetail('${r._key}')">Detail</button>
+        <button class="btn-sm btn-sm-share" onclick="shareRuko('${r._key}')" title="Share">🔗</button>
+        ${adminBtns}
+      </div>
+    </div></div>`;
+}
+
+function listHTML(r){
+  const tc=tcol(r.kenaikan||0), fotos=getFotos(r), thumb=fotos[0]||FALLBACK;
+  const adminBtns=isAdmin?`<button class="btn-sm btn-sm-navy" style="padding:5px 10px" onclick="openEdit('${r._key}')">✏️</button>
+    <button class="btn-sm btn-sm-amber" style="padding:5px 10px" onclick="dupListing('${r._key}')">⧉</button>
+    <button class="btn-sm btn-sm-red" style="padding:5px 10px" onclick="openDelete('${r._key}')">🗑</button>`:'';
+  const isDimmedL = r.status==='Sold'||r.status==='DONE';
+  const mapsLinkL = r.maps ? `<a href="${esc(r.maps)}" target="_blank" onclick="event.stopPropagation()" style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;color:#2e7d32;background:#e8f5e9;padding:2px 7px;border-radius:6px;text-decoration:none;margin-top:3px">📍 Maps</a>` : '';
+  return `<div class="list-card" onclick="openDetail('${r._key}')" style="${isDimmedL?'opacity:0.5;filter:grayscale(30%)':''}">
+    <img class="list-thumb" src="${esc(thumb)}" onerror="this.src='${FALLBACK}'" alt="">
+    <div class="list-info">
+      <div class="list-name">${esc(r.nama)}</div>
+      <div class="list-loc">📍 ${esc(r.wilayah)} · <span style="background:${scol(r.status)};color:white;font-size:10px;padding:1px 6px;border-radius:3px">${esc(r.status)}</span></div>
+    </div>
+    <div class="list-right">
+      <div class="list-price">${fmtRp(r.harga)}</div>
+      <div class="list-kenaikan" style="color:${tc.c}">▲ ${r.kenaikan||0}%/thn</div>
+      <div class="list-actions" onclick="event.stopPropagation()">
+        <button class="btn-sm-outline" style="padding:5px 10px;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid #C0543A;background:transparent;color:#C0543A" onclick="openDetail('${r._key}')">Detail</button>
+        <button class="btn-sm btn-sm-share" style="padding:5px 10px;flex:none" onclick="shareRuko('${r._key}')" title="Share">🔗</button>
+        ${adminBtns}
+      </div>
+    </div></div>`;
+}
+
+/* ── DETAIL ── */
+window.openDetail = key => {
+  const r=DB[key]; if(!r) return;
+  const fotos=getFotos(r);
+  const h1=r.harga*(1+r.kenaikan/100), h3=r.harga*Math.pow(1+r.kenaikan/100,3), h5=r.harga*Math.pow(1+r.kenaikan/100,5);
+  const tc=tcol(r.kenaikan||0);
+  const history=r.priceHistory?Object.values(r.priceHistory).sort((a,b)=>b.ts-a.ts):[];
+  const tags=(r.tags||[]).map(t=>`<span class="det-tag">${esc(t)}</span>`).join('');
+  const waLink=r.wa?`https://wa.me/${r.wa.replace(/\D/g,'')}?text=Halo,%20saya%20tertarik%20dengan%20${encodeURIComponent(r.nama)}`:'';
+
+  const fotosJSON=JSON.stringify(fotos);
+  let gallHTML='';
+  if(!fotos.length) gallHTML=`<img src="${FALLBACK}" style="width:100%;height:185px;object-fit:cover;border-radius:7px;margin-bottom:13px">`;
+  else if(fotos.length===1) gallHTML=`<div class="gallery one"><img src="${esc(fotos[0])}" onerror="this.src='${FALLBACK}'" onclick="openLightbox(${fotosJSON},0)"></div>`;
+  else gallHTML=`<div class="gallery multi">${fotos.map((f,i)=>`<img src="${esc(f)}" onerror="this.src='${FALLBACK}'" onclick="openLightbox(${fotosJSON},${i})">`).join('')}</div>`;
+
+  let histHTML='';
+  if(history.length>1){
+    histHTML=`<div class="history-box"><div class="box-title">📜 Riwayat Harga</div>`+
+    history.map((h,i)=>{
+      const prev=history[i+1], diff=prev?((h.harga-prev.harga)/prev.harga*100):0;
+      return `<div class="hist-row"><span class="hist-date">${fmtDate(h.ts)}</span><span class="hist-price">${fmtRp(h.harga)}</span>${prev?`<span class="hist-diff" style="background:${diff>=0?'#dcfce7':'#fee2e2'};color:${diff>=0?'#16a34a':'#dc2626'}">${diff>=0?'+':''}${diff.toFixed(1)}%</span>`:''}</div>`;
+    }).join('')+`</div>`;
+  }
+
+  document.getElementById('detailBody').innerHTML=`
+    ${gallHTML}
+    <div class="det-header">
+      <div><div class="det-name">${esc(r.nama)}</div><div class="det-loc">📍 ${esc(r.wilayah)}</div></div>
+      <span class="badge-status" style="background:${scol(r.status)};position:static;font-size:11px">${esc(r.status)}</span>
+    </div>
+    ${tags?`<div class="det-tags">${tags}</div>`:''}
+    <div class="det-alamat">🏠 ${esc(r.alamat)}</div>
+    ${r.kontak?`<div class="det-contact">👤 ${esc(r.kontak)}${r.wa?` · <a href="${waLink}" target="_blank">📱 ${esc(r.wa)}</a>`:''}${r.wa?`<br><a class="btn-wa" href="${waLink}" target="_blank">💬 WhatsApp Sekarang</a>`:''}</div>`:''}
+    ${r.maps?`<div style="margin-bottom:13px"><a href="${esc(r.maps)}" target="_blank" class="btn-maps" style="display:inline-flex;align-items:center;gap:6px;background:#e8f5e9;color:#2e7d32;border:none;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none">📍 Buka Google Maps</a></div>`:''}
+    <div class="det-grid">
+      <div><div class="det-ilbl">Harga Saat Ini</div><div class="det-ival">${fmtRp(r.harga)}</div><div class="det-isub">${fmtFull(r.harga)}</div></div>
+      <div><div class="det-ilbl">Kenaikan/Tahun</div><span class="badge-trend" style="background:${tc.bg};color:${tc.c};position:static;display:inline-flex;font-size:12px;padding:4px 10px">▲ ${r.kenaikan||0}%</span></div>
+      <div><div class="det-ilbl">Luas Bangunan</div><div class="det-ival" style="font-size:14px">${r.luas||0} m²</div></div>
+      <div><div class="det-ilbl">Jumlah Lantai</div><div class="det-ival" style="font-size:14px">${r.lantai||0} Lantai</div></div>
+    </div>
+    ${r.catatan?`<div class="catatan-box"><div class="box-title">📝 Catatan</div><div class="catatan-txt">${esc(r.catatan)}</div></div>`:''}
+    ${histHTML}
+    <div class="proyeksi-box">
+      <div class="box-title">📈 Proyeksi Kenaikan Harga</div>
+      <div class="proy-row"><span class="proy-lbl">1 Tahun lagi</span><span class="proy-val">${fmtRp(h1)}</span></div>
+      <div class="proy-row"><span class="proy-lbl">3 Tahun lagi</span><span class="proy-val">${fmtRp(h3)}</span></div>
+      <div class="proy-row"><span class="proy-lbl">5 Tahun lagi</span><span class="proy-val gold">${fmtRp(h5)}</span></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
+      <div class="det-meta" style="margin:0">Ditambah: ${fmtDate(r.createdAt)} · Diupdate: ${fmtDate(r.updatedAt)}</div>
+      <button onclick="shareRuko('${key}')" style="display:inline-flex;align-items:center;gap:5px;background:#fdf0eb;color:#C0543A;border:1.5px solid #EDD9D0;padding:7px 13px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">🔗 Share</button>
+    </div>`;
+  openModal('detailOverlay');
+};
+
+/* ── LIGHTBOX ── */
+window.openLightbox = (imgs,idx) => {
+  lbImages=imgs; lbIdx=idx;
+  document.getElementById('lbImg').src=imgs[idx];
+  document.getElementById('lbCounter').textContent=`${idx+1} / ${imgs.length}`;
+  document.getElementById('lightbox').classList.add('active');
+};
+window.closeLightbox = () => document.getElementById('lightbox').classList.remove('active');
+window.lbNav = dir => {
+  lbIdx=(lbIdx+dir+lbImages.length)%lbImages.length;
+  document.getElementById('lbImg').src=lbImages[lbIdx];
+  document.getElementById('lbCounter').textContent=`${lbIdx+1} / ${lbImages.length}`;
+};
+
+/* ── TAGS ── */
+window.handleTagKey = e => {
+  if(e.key==='Enter'||e.key===','){e.preventDefault();addTag(e.target.value);}
+  if(e.key==='Backspace'&&!e.target.value&&formTags.length){formTags.pop();renderTagChips();}
+};
+window.handleTagInput = e => { if(e.target.value.endsWith(','))addTag(e.target.value.slice(0,-1)); };
+function addTag(v){v=v.trim();if(v&&!formTags.includes(v)){formTags.push(v);renderTagChips();}document.getElementById('tagRI').value='';}
+window.removeTag = i => {formTags.splice(i,1);renderTagChips();};
+function renderTagChips(){
+  document.getElementById('tagChips').innerHTML=formTags.map((t,i)=>`<span class="tag-chip">${esc(t)}<button onclick="removeTag(${i})">×</button></span>`).join('');
+}
+
+/* ── FOTO PREVIEW ── */
+/* previewFotos removed - replaced by upload zone */
+
+
+/* ── LISTING FOTO UPLOAD HANDLERS ── */
+window.handleListingFotoSelect = function(e){
+  const files = [...e.target.files];
+  listingFotoFiles = [...listingFotoFiles, ...files].slice(0,10);
+  renderListingFotoPreview();
+  e.target.value='';
+};
+
+function renderListingFotoPreview(){
+  const wrap = document.getElementById('listingFotoPreview');
+  if(!wrap) return;
+  const uploadedHTML = listingFotoUrls.map((url,i)=>`
+    <div class="up-thumb">
+      <img src="${esc(url)}" onerror="this.src=''">
+      <button class="up-thumb-del" onclick="removeListingUploadedFoto(${i})">×</button>
+    </div>`).join('');
+  const newHTML = listingFotoFiles.map((f,i)=>`
+    <div class="up-thumb" id="listingFotoThumb_${i}">
+      <img src="${URL.createObjectURL(f)}">
+      <button class="up-thumb-del" onclick="removeListingNewFoto(${i})">×</button>
+    </div>`).join('');
+  wrap.innerHTML = uploadedHTML + newHTML;
+}
+
+window.removeListingUploadedFoto = i => { listingFotoUrls.splice(i,1); renderListingFotoPreview(); };
+window.removeListingNewFoto = i => { listingFotoFiles.splice(i,1); renderListingFotoPreview(); };
+
+function setupListingDragDrop(){
+  const zone = document.getElementById('listingFotoZone');
+  if(!zone) return;
+  zone.addEventListener('dragover', e=>{e.preventDefault();zone.classList.add('dragover');});
+  zone.addEventListener('dragleave', ()=>zone.classList.remove('dragover'));
+  zone.addEventListener('drop', e=>{
+    e.preventDefault(); zone.classList.remove('dragover');
+    const files=[...e.dataTransfer.files].filter(f=>f.type.startsWith('image/'));
+    listingFotoFiles=[...listingFotoFiles,...files].slice(0,10);
+    renderListingFotoPreview();
+  });
+}
+
+/* ── FORM ── */
+function clearForm(){
+  ['fNama','fWilayah','fAlamat','fHarga','fKenaikan','fLuas','fLantai','fKontak','fWa','fMaps','fCatatan'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fStatus').value='Review MoU'; document.getElementById('formId').value='';
+  listingFotoFiles=[]; listingFotoUrls=[];
+  const lprev=document.getElementById('listingFotoPreview'); if(lprev) lprev.innerHTML='';
+  formTags=[]; renderTagChips();
+}
+
+window.openAdd = () => {
+  if(!isAdmin){showToast('⛔ Tamu tidak bisa menambah listing');return;}
+  clearForm(); document.getElementById('formTitle').textContent='Tambah Listing Ruko';
+  document.getElementById('formSaveBtn').textContent='+ Tambah Listing'; openModal('formOverlay');
+  setTimeout(()=>{ renderListingFotoPreview(); setupListingDragDrop(); }, 50);
+};
+
+window.openEdit = key => {
+  if(!isAdmin){showToast('⛔ Tamu tidak bisa mengedit');return;}
+  const r=DB[key]; if(!r) return; clearForm();
+  document.getElementById('formId').value=key;
+  document.getElementById('fNama').value=r.nama||''; document.getElementById('fWilayah').value=r.wilayah||'';
+  document.getElementById('fAlamat').value=r.alamat||''; document.getElementById('fHarga').value=r.harga||'';
+  document.getElementById('fKenaikan').value=r.kenaikan||''; document.getElementById('fLuas').value=r.luas||'';
+  document.getElementById('fLantai').value=r.lantai||''; document.getElementById('fKontak').value=r.kontak||'';
+  document.getElementById('fWa').value=r.wa||'';
+  document.getElementById('fMaps').value=r.maps||''; document.getElementById('fCatatan').value=r.catatan||'';
+  listingFotoUrls=[...getFotos(r)]; listingFotoFiles=[];
+  formTags=[...(r.tags||[])]; renderTagChips();
+  document.getElementById('fStatus').value=r.status||'Review MoU';
+  document.getElementById('formTitle').textContent='Edit Listing Ruko';
+  document.getElementById('formSaveBtn').textContent='✓ Simpan Perubahan'; openModal('formOverlay');
+  setTimeout(()=>{ renderListingFotoPreview(); setupListingDragDrop(); }, 50);
+};
+
+window.saveForm = async () => {
+  const nama=document.getElementById('fNama').value.trim(), wilayah=document.getElementById('fWilayah').value.trim();
+  const alamat=document.getElementById('fAlamat').value.trim(), harga=Number(document.getElementById('fHarga').value);
+  if(!nama||!wilayah||!alamat||!harga){showToast('⚠️ Nama, Wilayah, Alamat & Harga wajib diisi');return;}
+  const btn=document.getElementById('formSaveBtn'); btn.disabled=true; btn.textContent='Menyimpan…';
+  // Upload new listing fotos to Cloudinary
+  let uploadedListingFotos = [...listingFotoUrls];
+  if(listingFotoFiles.length){
+    const btn2=document.getElementById('formSaveBtn'); btn2.disabled=true; btn2.textContent='Mengupload foto…';
+    for(let i=0;i<listingFotoFiles.length;i++){
+      const url = await uploadFile(listingFotoFiles[i],'listing/fotos/'+Date.now()+'_'+listingFotoFiles[i].name, pct=>{});
+      uploadedListingFotos.push(url);
+    }
+  }
+  const fotos = uploadedListingFotos;
+  const editKey=document.getElementById('formId').value, now=Date.now();
+  const obj={nama,wilayah,alamat,harga,kenaikan:parseFloat(document.getElementById('fKenaikan').value)||0,
+    luas:parseInt(document.getElementById('fLuas').value)||0,lantai:parseInt(document.getElementById('fLantai').value)||0,
+    kontak:document.getElementById('fKontak').value.trim(),wa:document.getElementById('fWa').value.trim(),
+    maps:document.getElementById('fMaps').value.trim(),
+    catatan:document.getElementById('fCatatan').value.trim(),fotos,tags:formTags,
+    status:document.getElementById('fStatus').value,updatedAt:now};
+  try{
+    if(editKey){
+      const prev=DB[editKey], history={...(prev?.priceHistory||{})};
+      if(prev&&Number(prev.harga)!==harga){
+        if(!Object.values(history).find(h=>h.harga===prev.harga)) history[prev.createdAt||now-1]={harga:prev.harga,ts:prev.createdAt||now-1};
+        history[now]={harga,ts:now};
+      }
+      obj.priceHistory=history; obj.createdAt=prev?.createdAt||now;
+      await set(ref(fbDb,'ruko/'+editKey),obj); showToast('✓ Listing berhasil diperbarui');
+    } else {
+      obj.createdAt=now; obj.priceHistory={[now]:{harga,ts:now}};
+      await push(ref(fbDb,'ruko'),obj); showToast('✓ Listing berhasil ditambahkan');
+    }
+    closeModal('formOverlay');
+  }catch(e){showToast('❌ '+e.message);}
+  finally{btn.disabled=false;}
+};
+
+/* ── DUPLICATE ── */
+window.dupListing = async key => {
+  if(!isAdmin){showToast('⛔ Tamu tidak bisa menduplikat');return;}
+  const r=DB[key]; if(!r) return;
+  const now=Date.now(), copy={...r,nama:'[Salinan] '+r.nama,createdAt:now,updatedAt:now,priceHistory:{[now]:{harga:r.harga,ts:now}}};
+  delete copy._key;
+  try{await push(ref(fbDb,'ruko'),copy);showToast('⧉ Listing berhasil diduplikat');}
+  catch(e){showToast('❌ '+e.message);}
+};
+
+/* ── DELETE ── */
+let pendingDelKey=null;
+window.openDelete = key => {
+  if(!isAdmin){showToast('⛔ Tamu tidak bisa menghapus');return;}
+  const r=DB[key]; if(!r) return; pendingDelKey=key;
+  document.getElementById('deleteMsg').innerHTML=`"<strong>${esc(r.nama)}</strong>" akan dihapus permanen.`;
+  document.getElementById('confirmDelBtn').onclick=confirmDelete; openModal('deleteOverlay');
+};
+async function confirmDelete(){
+  try{await remove(ref(fbDb,'ruko/'+pendingDelKey));closeModal('deleteOverlay');showToast('🗑 Dihapus');}
+  catch(e){showToast('❌ '+e.message);}
+}
+
+/* ── EXPORT CSV ── */
+window.exportCSV = () => {
+  const list=Object.values(DB);
+  if(!list.length){showToast('Tidak ada data untuk diexport');return;}
+  const hdr=['Nama','Wilayah','Alamat','Harga','Kenaikan(%)','Luas(m2)','Lantai','Status','Kontak','WhatsApp','Tags','Catatan','Tgl Update'];
+  const rows=list.map(r=>[r.nama,r.wilayah,r.alamat,r.harga,r.kenaikan,r.luas,r.lantai,r.status,r.kontak||'',r.wa||'',(r.tags||[]).join(';'),r.catatan||'',fmtDate(r.updatedAt)]
+    .map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(','));
+  const csv=[hdr.join(','),...rows].join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
+  a.download='ruko-'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click(); showToast('📥 CSV berhasil didownload');
+};
+
+/* ── DASHBOARD ── */
+function renderDashboard(){
+  const list=Object.values(DB); if(!list.length){document.getElementById('dashCards').innerHTML='<div style="color:#aaa;padding:20px">Belum ada data</div>';return;}
+  const total=list.reduce((s,r)=>s+Number(r.harga||0),0);
+  const avgK=list.reduce((s,r)=>s+Number(r.kenaikan||0),0)/list.length;
+  const maxR=list.reduce((a,b)=>Number(a.harga)>Number(b.harga)?a:b);
+  document.getElementById('dashCards').innerHTML=`
+    <div class="dash-card"><div class="dash-lbl">Total Listing</div><div class="dash-val">${list.length}</div><div class="dash-sub">properti tercatat</div></div>
+    <div class="dash-card"><div class="dash-lbl">Total Nilai Portofolio</div><div class="dash-val" style="font-size:20px">${fmtRp(total)}</div><div class="dash-sub">${fmtFull(total)}</div></div>
+    <div class="dash-card"><div class="dash-lbl">Rata-rata Kenaikan</div><div class="dash-val" style="color:var(--green)">${avgK.toFixed(1)}%</div><div class="dash-sub">per tahun</div></div>
+    <div class="dash-card"><div class="dash-lbl">Harga Tertinggi</div><div class="dash-val" style="font-size:18px">${fmtRp(maxR.harga)}</div><div class="dash-sub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(maxR.nama)}</div></div>`;
+  // Harga per wilayah
+  const byW={};list.forEach(r=>{if(!byW[r.wilayah])byW[r.wilayah]={s:0,n:0};byW[r.wilayah].s+=Number(r.harga||0);byW[r.wilayah].n++;});
+  const wData=Object.entries(byW).map(([k,v])=>({k,avg:v.s/v.n})).sort((a,b)=>b.avg-a.avg).slice(0,8);
+  const maxW=wData[0]?.avg||1;
+  document.getElementById('chartHarga').innerHTML=wData.map(w=>`<div class="bar-row"><div class="bar-lbl">${esc(w.k)}</div><div class="bar-track"><div class="bar-fill" style="width:${w.avg/maxW*100}%"><span class="bar-fval">${fmtRp(w.avg)}</span></div></div></div>`).join('');
+  // Status
+  const sCols={'Review MoU':'#2563eb','MoU Disetujui':'#16a34a','MoU Ditolak':'#dc2626','Pending Pembayaran':'#d97706','Sold':'#C0543A','DONE':'#059669'};
+  document.getElementById('chartStatus').innerHTML=['Review MoU','MoU Disetujui','MoU Ditolak','Pending Pembayaran','Sold','DONE'].map(s=>{
+    const n=list.filter(r=>r.status===s).length,pct=Math.round(n/list.length*100);
+    return `<div class="pie-row"><div class="pie-dot" style="background:${sCols[s]}"></div><div class="pie-lbl">${s}</div><div class="pie-val">${n} <span style="color:var(--muted);font-size:11px">(${pct}%)</span></div></div>`;
+  }).join('');
+  // Kenaikan
+  const kData=list.filter(r=>r.kenaikan).map(r=>({n:r.nama,k:Number(r.kenaikan)})).sort((a,b)=>b.k-a.k).slice(0,10);
+  const maxK=kData[0]?.k||1;
+  const kc=p=>p>=10?'linear-gradient(90deg,#16a34a,#22c55e)':p>=7?'linear-gradient(90deg,#d97706,#fbbf24)':'linear-gradient(90deg,#2563eb,#60a5fa)';
+  document.getElementById('chartKenaikan').innerHTML=kData.map(d=>`<div class="bar-row"><div class="bar-lbl">${esc(d.n)}</div><div class="bar-track"><div class="k-fill" style="width:${d.k/maxK*100}%;background:${kc(d.k)}"><span class="bar-fval">${d.k}%</span></div></div></div>`).join('');
+}
+
+/* ── MODAL HELPERS ── */
+window.openModal  = id => document.getElementById(id).classList.add('active');
+window.closeModal = id => document.getElementById(id).classList.remove('active');
+window.closeOnBg  = (e,id) => {if(e.target.id===id) closeModal(id);};
+
+/* ── TOAST ── */
+let toastT;
+window.showToast = msg => {
+  const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show');
+  clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('show'),2800);
+};
+
+
+
+/* ══════════════════════════════════════════════
+   EKSPANSI DATA & RENDER
+══════════════════════════════════════════════ */
+const EKSPANSI_DATA = [
+  {rank:1,provinsi:"Jawa Tengah",pulau:"Jawa",market:9.2,cost:8.8,sdm:8.8,perizinan:8.8,skor:8.9,kategori:"⭐ Paling Ideal"},
+  {rank:2,provinsi:"Jawa Timur",pulau:"Jawa",market:9.5,cost:7.8,sdm:9.2,perizinan:8.4,skor:8.8,kategori:"⭐ Sangat Kuat"},
+  {rank:3,provinsi:"DI Yogyakarta",pulau:"Jawa",market:8.2,cost:9.0,sdm:9.0,perizinan:8.7,skor:8.7,kategori:"⭐ Stabil"},
+  {rank:4,provinsi:"Jawa Barat",pulau:"Jawa",market:9.6,cost:7.5,sdm:8.7,perizinan:8.2,skor:8.6,kategori:"🟢 High Volume"},
+  {rank:5,provinsi:"Sulawesi Selatan",pulau:"Sulawesi",market:8.7,cost:8.0,sdm:8.1,perizinan:7.8,skor:8.2,kategori:"🟢 Hub Timur"},
+  {rank:6,provinsi:"Sumatera Utara",pulau:"Sumatera",market:8.6,cost:7.9,sdm:8.3,perizinan:7.6,skor:8.1,kategori:"🟢 Kuat"},
+  {rank:7,provinsi:"Sumatera Selatan",pulau:"Sumatera",market:8.0,cost:8.2,sdm:7.6,perizinan:7.4,skor:7.9,kategori:"🟢 Potensial"},
+  {rank:8,provinsi:"Bali",pulau:"Bali",market:7.7,cost:6.8,sdm:7.8,perizinan:7.5,skor:7.5,kategori:"🟡 Premium Market"},
+  {rank:9,provinsi:"Lampung",pulau:"Sumatera",market:7.8,cost:8.2,sdm:7.5,perizinan:7.2,skor:7.5,kategori:"🟡 Stabil"},
+  {rank:10,provinsi:"Kalimantan Timur",pulau:"Kalimantan",market:7.9,cost:7.2,sdm:6.9,perizinan:6.9,skor:7.3,kategori:"🟡 Bertumbuh"},
+  {rank:11,provinsi:"Riau",pulau:"Sumatera",market:7.3,cost:7.5,sdm:7.4,perizinan:7.0,skor:7.3,kategori:"🟡 Perlu Strategi"},
+  {rank:12,provinsi:"Kalimantan Barat",pulau:"Kalimantan",market:7.6,cost:7.8,sdm:6.7,perizinan:6.8,skor:7.2,kategori:"🟡 Potensial"},
+  {rank:13,provinsi:"Kalimantan Selatan",pulau:"Kalimantan",market:7.5,cost:7.9,sdm:6.5,perizinan:6.8,skor:7.1,kategori:"🟡 Potensial"},
+  {rank:14,provinsi:"Sulawesi Utara",pulau:"Sulawesi",market:7.4,cost:7.3,sdm:6.6,perizinan:6.5,skor:7.0,kategori:"🟡 Stabil"},
+  {rank:15,provinsi:"Kalimantan Tengah",pulau:"Kalimantan",market:7.2,cost:8.0,sdm:6.4,perizinan:6.7,skor:6.9,kategori:"🟡 Bertahap"},
+  {rank:16,provinsi:"Banten",pulau:"Jawa",market:8.5,cost:6.5,sdm:8.0,perizinan:7.5,skor:7.4,kategori:"🟡 Mahal"},
+  {rank:17,provinsi:"Nusa Tenggara Barat",pulau:"NTB",market:6.0,cost:7.8,sdm:6.2,perizinan:6.2,skor:6.5,kategori:"🔴 Jangka Menengah"},
+  {rank:18,provinsi:"Sulawesi Tengah",pulau:"Sulawesi",market:6.5,cost:8.0,sdm:6.2,perizinan:6.5,skor:6.6,kategori:"🔴 Bertahap"},
+  {rank:19,provinsi:"Papua",pulau:"Papua",market:6.2,cost:6.0,sdm:5.8,perizinan:5.7,skor:5.9,kategori:"🔴 Risiko Tinggi"},
+  {rank:20,provinsi:"Papua Selatan",pulau:"Papua",market:6.0,cost:6.0,sdm:5.7,perizinan:5.6,skor:5.8,kategori:"🔴 Risiko Tinggi"},
+  {rank:21,provinsi:"Papua Tengah",pulau:"Papua",market:6.0,cost:6.0,sdm:5.7,perizinan:5.6,skor:5.8,kategori:"🔴 Risiko Tinggi"},
+  {rank:22,provinsi:"Papua Pegunungan",pulau:"Papua",market:5.8,cost:6.0,sdm:5.5,perizinan:5.5,skor:5.7,kategori:"🔴 Risiko Tinggi"},
+  {rank:23,provinsi:"Papua Barat",pulau:"Papua",market:6.2,cost:6.2,sdm:5.8,perizinan:5.8,skor:6.0,kategori:"🔴 Risiko Tinggi"},
+  {rank:24,provinsi:"Papua Barat Daya",pulau:"Papua",market:6.1,cost:6.1,sdm:5.8,perizinan:5.7,skor:5.9,kategori:"🔴 Risiko Tinggi"},
+  {rank:25,provinsi:"Nusa Tenggara Timur",pulau:"NTT",market:6.1,cost:7.2,sdm:6.0,perizinan:6.0,skor:6.1,kategori:"🔴 Jangka Panjang"},
+  {rank:26,provinsi:"Maluku",pulau:"Maluku",market:6.0,cost:7.5,sdm:6.0,perizinan:6.0,skor:6.2,kategori:"🔴 Jangka Panjang"},
+  {rank:27,provinsi:"Maluku Utara",pulau:"Maluku",market:6.0,cost:7.5,sdm:6.0,perizinan:6.0,skor:6.2,kategori:"🔴 Jangka Panjang"},
+  {rank:28,provinsi:"Gorontalo",pulau:"Sulawesi",market:6.0,cost:8.0,sdm:6.0,perizinan:6.0,skor:6.2,kategori:"🔴 Jangka Panjang"},
+  {rank:29,provinsi:"Sulawesi Barat",pulau:"Sulawesi",market:6.0,cost:8.0,sdm:5.8,perizinan:5.8,skor:6.1,kategori:"🔴 Jangka Panjang"},
+  {rank:30,provinsi:"Bengkulu",pulau:"Sumatera",market:6.5,cost:8.0,sdm:6.2,perizinan:6.5,skor:6.6,kategori:"🔴 Kecil"},
+  {rank:31,provinsi:"Jambi",pulau:"Sumatera",market:6.8,cost:7.8,sdm:6.5,perizinan:6.8,skor:6.8,kategori:"🟡 Kecil"},
+  {rank:32,provinsi:"Kepulauan Riau",pulau:"Sumatera",market:6.4,cost:6.5,sdm:7.0,perizinan:6.4,skor:6.5,kategori:"🔴 Mahal"},
+  {rank:33,provinsi:"Bangka Belitung",pulau:"Sumatera",market:6.2,cost:7.5,sdm:6.2,perizinan:6.5,skor:6.4,kategori:"🔴 Kecil"},
+  {rank:34,provinsi:"Aceh",pulau:"Sumatera",market:6.5,cost:7.8,sdm:6.5,perizinan:6.0,skor:6.6,kategori:"🔴 Regulasi Khusus"},
+  {rank:35,provinsi:"Kalimantan Utara",pulau:"Kalimantan",market:6.0,cost:7.8,sdm:6.0,perizinan:6.5,skor:6.3,kategori:"🔴 Kecil"},
+  {rank:36,provinsi:"Sumatera Barat",pulau:"Sumatera",market:7.1,cost:7.5,sdm:6.8,perizinan:7.0,skor:7.1,kategori:"🟡 Stabil"},
+  {rank:37,provinsi:"DKI Jakarta",pulau:"Jawa",market:10,cost:4.0,sdm:9.5,perizinan:8.0,skor:7.2,kategori:"🔴 Cost Tinggi"},
+  {rank:38,provinsi:"Banten Selatan",pulau:"Jawa",market:7.0,cost:7.5,sdm:6.5,perizinan:7.0,skor:7.0,kategori:"🟡 Rural"}
+];
+
+function katColor(k){
+  if(k.includes('⭐')) return {bg:'#FFF8E1',color:'#92650a',border:'#f5e7b2'};
+  if(k.includes('🟢')) return {bg:'#dcfce7',color:'#15803d',border:'#bbf7d0'};
+  if(k.includes('🟡')) return {bg:'#fef9c3',color:'#854d0e',border:'#fef08a'};
+  return {bg:'#fee2e2',color:'#991b1b',border:'#fecaca'};
+}
+function rankBg(r){
+  if(r===1) return {bg:'#E8855A',color:'white'};
+  if(r===2) return {bg:'#9ca3af',color:'white'};
+  if(r===3) return {bg:'#cd7f32',color:'white'};
+  if(r<=7)  return {bg:'#dcfce7',color:'#15803d'};
+  if(r<=16) return {bg:'#fef9c3',color:'#854d0e'};
+  return {bg:'#fee2e2',color:'#991b1b'};
+}
+function scoreColor(s){
+  if(s>=8.5) return '#16a34a';
+  if(s>=7.5) return '#d97706';
+  if(s>=6.5) return '#2563eb';
+  return '#dc2626';
+}
+
+let ekspView='table', ekspFilter='', ekspPulau='', ekspKat='';
+
+/* renderEkspansi: hanya render shell sekali, lalu updateEkspResults untuk update data */
+window.renderEkspansi = function(){
+  // Hanya bangun shell jika belum ada
+  if(!document.getElementById('ekspResults')){
+    const pulauList=[...new Set(EKSPANSI_DATA.map(d=>d.pulau))].sort();
+    document.getElementById('ekspansiContent').innerHTML=`
+      <div class="eksp-intro">
+        <div class="eksp-intro-title">🗺️ Rekomendasi Ekspansi Properti</div>
+        <div class="eksp-intro-sub">Penilaian 38 provinsi berdasarkan 4 parameter: Market (potensi pasar), Cost (biaya operasional), SDM (ketersediaan tenaga kerja), dan Perizinan (kemudahan regulasi). Skor 1–10, semakin tinggi semakin baik.</div>
+      </div>
+      <div class="eksp-legend">
+        <div class="eksp-leg-item"><span style="color:#92650a">⭐</span> Prioritas Utama (≥8.7)</div>
+        <div class="eksp-leg-item"><span style="color:#15803d">🟢</span> Sangat Direkomendasikan (7.9–8.6)</div>
+        <div class="eksp-leg-item"><span style="color:#854d0e">🟡</span> Pertimbangkan (6.5–7.8)</div>
+        <div class="eksp-leg-item"><span style="color:#991b1b">🔴</span> Tunda / Persiapan Matang (&lt;6.5)</div>
+      </div>
+      <div class="eksp-filters">
+        <input class="eksp-search" id="ekspSearchInput" placeholder="🔍 Cari provinsi…"
+          oninput="ekspFilter=this.value;updateEkspResults()">
+        <select class="eksp-filter-sel" id="ekspPulauSel"
+          onchange="ekspPulau=this.value;updateEkspResults()">
+          <option value="">Semua Pulau</option>
+          ${pulauList.map(p=>`<option value="${p}">${p}</option>`).join('')}
+        </select>
+        <select class="eksp-filter-sel" id="ekspKatSel"
+          onchange="ekspKat=this.value;updateEkspResults()">
+          <option value="">Semua Kategori</option>
+          <option value="ideal">⭐ Prioritas Utama</option>
+          <option value="kuat">🟢 Sangat Direkomendasikan</option>
+          <option value="sedang">🟡 Pertimbangkan</option>
+          <option value="risiko">🔴 Tunda</option>
+        </select>
+        <span class="eksp-count" id="ekspCount"></span>
+        <div class="view-mode-btns" style="margin-left:auto">
+          <button class="view-mode-btn active" id="btnEkspTable" onclick="ekspView='table';updateEkspViewBtns();updateEkspResults()">☰ Tabel</button>
+          <button class="view-mode-btn" id="btnEkspCard" onclick="ekspView='card';updateEkspViewBtns();updateEkspResults()">⊞ Kartu</button>
+        </div>
+      </div>
+      <div id="ekspResults"></div>`;
+  }
+  updateEkspResults();
+};
+
+function updateEkspViewBtns(){
+  document.getElementById('btnEkspTable').classList.toggle('active', ekspView==='table');
+  document.getElementById('btnEkspCard').classList.toggle('active', ekspView==='card');
+}
+
+function updateEkspResults(){
+  // Baca langsung dari DOM supaya selalu akurat
+  const searchEl = document.getElementById('ekspSearchInput');
+  const pulauEl  = document.getElementById('ekspPulauSel');
+  const katEl    = document.getElementById('ekspKatSel');
+  const q   = searchEl ? searchEl.value.toLowerCase().trim() : ekspFilter.toLowerCase().trim();
+  const pul = pulauEl  ? pulauEl.value  : ekspPulau;
+  const kat = katEl    ? katEl.value    : ekspKat;
+  // Sync variabel
+  if(searchEl) ekspFilter = searchEl.value;
+  if(pulauEl)  ekspPulau  = pulauEl.value;
+  if(katEl)    ekspKat    = katEl.value;
+
+  let data=[...EKSPANSI_DATA];
+  if(q)   data=data.filter(d=>d.provinsi.toLowerCase().includes(q)||d.pulau.toLowerCase().includes(q));
+  if(pul) data=data.filter(d=>d.pulau===pul);
+  if(kat){
+    if(kat==='ideal')  data=data.filter(d=>d.kategori.includes('⭐'));
+    else if(kat==='kuat')   data=data.filter(d=>d.kategori.includes('🟢'));
+    else if(kat==='sedang') data=data.filter(d=>d.kategori.includes('🟡'));
+    else if(kat==='risiko') data=data.filter(d=>d.kategori.includes('🔴'));
+  }
+  const countEl=document.getElementById('ekspCount');
+  if(countEl) countEl.textContent=data.length+' provinsi';
+  const resultsEl=document.getElementById('ekspResults');
+  if(resultsEl) resultsEl.innerHTML=ekspView==='table'?renderEkspTable(data):renderEkspCards(data);
+};
+
+function renderEkspTable(data){
+  if(!data.length) return '<div class="empty"><div class="empty-icon">🔍</div><div class="empty-title">Tidak ada hasil</div></div>';
+  return `<div class="eksp-table-wrap">
+    <table class="eksp-table">
+      <thead><tr>
+        <th style="text-align:center;width:48px">#</th>
+        <th>Provinsi</th>
+        <th>Pulau</th>
+        <th style="text-align:center">Market</th>
+        <th style="text-align:center">Cost</th>
+        <th style="text-align:center">SDM</th>
+        <th style="text-align:center">Perizinan</th>
+        <th style="min-width:130px">Skor Total</th>
+        <th>Kategori</th>
+      </tr></thead>
+      <tbody>
+      ${data.map(d=>{
+        const rb=rankBg(d.rank), kc=katColor(d.kategori), sc=scoreColor(d.skor);
+        const barW=(s)=>Math.round((s/10)*100);
+        return `<tr>
+          <td style="text-align:center"><div class="rank-badge" style="background:${rb.bg};color:${rb.color}">${d.rank}</div></td>
+          <td style="font-weight:700;color:var(--navy)">${d.provinsi}</td>
+          <td><span class="pulau-tag">${d.pulau}</span></td>
+          <td style="text-align:center"><span style="font-weight:700;color:${scoreColor(d.market)}">${d.market}</span></td>
+          <td style="text-align:center"><span style="font-weight:700;color:${scoreColor(d.cost)}">${d.cost}</span></td>
+          <td style="text-align:center"><span style="font-weight:700;color:${scoreColor(d.sdm)}">${d.sdm}</span></td>
+          <td style="text-align:center"><span style="font-weight:700;color:${scoreColor(d.perizinan)}">${d.perizinan}</span></td>
+          <td>
+            <div class="score-bar">
+              <div class="score-track"><div class="score-fill" style="width:${barW(d.skor)}%;background:${sc}"></div></div>
+              <div class="score-num" style="color:${sc}">${d.skor}</div>
+            </div>
+          </td>
+          <td><span class="cat-badge" style="background:${kc.bg};color:${kc.color};border:1px solid ${kc.border}">${d.kategori}</span></td>
+        </tr>`;
+      }).join('')}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+function renderEkspCards(data){
+  if(!data.length) return '<div class="empty"><div class="empty-icon">🔍</div><div class="empty-title">Tidak ada hasil</div></div>';
+  return `<div class="eksp-cards">${data.map(d=>{
+    const rb=rankBg(d.rank), kc=katColor(d.kategori);
+    const scores=[
+      {lbl:'Market',val:d.market},
+      {lbl:'Cost',val:d.cost},
+      {lbl:'SDM',val:d.sdm},
+      {lbl:'Perizinan',val:d.perizinan}
+    ];
+    return `<div class="eksp-card" style="border-left-color:${kc.color}">
+      <div class="eksp-card-rank">Rank #${d.rank}</div>
+      <div class="eksp-card-name">${d.provinsi}</div>
+      <div class="eksp-card-pulau"><span class="pulau-tag">${d.pulau}</span></div>
+      <div class="eksp-card-scores">
+        ${scores.map(s=>`<div class="eksp-score-item">
+          <div class="eksp-score-lbl">${s.lbl}</div>
+          <div class="eksp-score-val" style="color:${scoreColor(s.val)}">${s.val}</div>
+          <div class="eksp-score-bar"><div class="eksp-score-bar-fill" style="width:${s.val*10}%;background:${scoreColor(s.val)}"></div></div>
+        </div>`).join('')}
+      </div>
+      <div class="eksp-total">
+        <span class="cat-badge" style="background:${kc.bg};color:${kc.color};border:1px solid ${kc.border}">${d.kategori}</span>
+        <div>
+          <div class="eksp-total-lbl" style="text-align:right;font-size:10px;color:var(--muted)">SKOR</div>
+          <div class="eksp-total-val" style="color:${scoreColor(d.skor)}">${d.skor}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+/* ══════════════════════════════════════════════
+   EXISTING RUKO
+══════════════════════════════════════════════ */
+let exFotoFiles = [];   // File objects to upload
+let exPdfFile   = null;
+let exFotoUrls  = [];   // Already-uploaded URLs (edit mode)
+let exPdfUrl    = '';
+let listingFotoFiles = [];  // New foto files for listing
+let listingFotoUrls  = [];  // Already-uploaded listing foto URLs (edit mode)
+
+/* ── RENDER ── */
+let exView = 'grid';
+
+window.renderExisting = function(){
+  const list = Object.entries(EXISTING).map(([k,v])=>({...v,_key:k}))
+    .sort((a,b)=>(a.nama||'').localeCompare(b.nama||''));
+  const adminBtn = isAdmin ? `<button class="btn-add" onclick="openAddExisting()" style="font-size:13px">+ Tambah Ruko Existing</button>` : '';
+  let html = `<div class="ex-header">
+    <div><div class="ex-title">📍 Ruko Existing</div><div class="ex-sub">${list.length} lokasi terdaftar</div></div>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <div class="view-toggle">
+        <button class="view-btn ${exView==='grid'?'active':''}" id="btnExGrid" onclick="setExView('grid')" title="Grid">⊞</button>
+        <button class="view-btn ${exView==='list'?'active':''}" id="btnExList" onclick="setExView('list')" title="List">☰</button>
+      </div>
+      ${adminBtn}
+    </div>
+  </div>`;
+  if(!list.length){
+    html += `<div class="ex-empty"><div style="font-size:44px;margin-bottom:12px">🏠</div><div style="font-size:15px;font-weight:700;color:#aaa">Belum ada ruko existing</div><div style="font-size:13px">Klik "+ Tambah Ruko Existing" untuk mulai</div></div>`;
+  } else {
+    if(exView==='grid'){
+      html += `<div class="ex-grid">${list.map(exCardHTML).join('')}</div>`;
+    } else {
+      html += `<div class="list-view">${list.map(exListHTML).join('')}</div>`;
+    }
+  }
+  document.getElementById('existingContent').innerHTML = html;
+};
+
+window.setExView = function(v){
+  exView = v;
+  renderExisting();
+};
+
+function exListHTML(r){
+  const fotos = r.fotos||[];
+  const thumb = fotos[0] || 'https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600&q=80';
+  const h = r.harga||{};
+  const harga1 = h.h1 ? fmtRp(h.h1) : '—';
+  const harga5 = h.h5 ? fmtRp(h.h5) : '—';
+  const mapsBtn = r.maps ? `<a class="ex-badge ex-badge-maps" href="${esc(r.maps)}" target="_blank" onclick="event.stopPropagation()">📍 Maps</a>` : '';
+  const pdfUrlL = r.pdf  ? `https://docs.google.com/viewer?url=${encodeURIComponent(r.pdf)}&embedded=true` : '';
+  const pdfBtn  = r.pdf  ? `<a class="ex-badge ex-badge-pdf"  href="${pdfUrlL}"  target="_blank" onclick="event.stopPropagation()">📄 PDF</a>` : '';
+  const adminBtns = isAdmin ? `
+    <button class="btn-sm btn-sm-navy" style="padding:5px 10px;flex:none" onclick="event.stopPropagation();openEditExisting('${r._key}')">✏️</button>
+    <button class="btn-sm btn-sm-red" style="padding:5px 10px;flex:none" onclick="event.stopPropagation();openDeleteExisting('${r._key}')">🗑</button>` : '';
+  return `<div class="list-card" onclick="openExistingDetail('${r._key}')">
+    <img class="list-thumb" src="${esc(thumb)}" onerror="this.src='https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600&q=80'" alt="" style="width:80px;height:64px;border-radius:8px;object-fit:cover;flex-shrink:0">
+    <div class="list-info">
+      <div class="list-name">${esc(r.nama||'')}</div>
+      <div class="list-loc" style="font-size:11px;color:var(--muted);margin-top:2px">📍 ${esc(r.alamat||'')}</div>
+      <div style="display:flex;gap:5px;margin-top:5px">${mapsBtn}${pdfBtn}</div>
+    </div>
+    <div class="list-right">
+      <div class="list-price" style="font-size:13px">Thn 1: ${harga1}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px">Thn 5: ${harga5}</div>
+      <div class="list-actions" onclick="event.stopPropagation()" style="margin-top:6px">
+        <button class="btn-sm-outline" style="padding:5px 10px;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid var(--navy);background:transparent;color:var(--navy)" onclick="openExistingDetail('${r._key}')">Detail</button>
+        ${adminBtns}
+      </div>
+    </div>
+  </div>`;
+}
+
+function exCardHTML(r){
+  const fotos = r.fotos||[];
+  const thumb = fotos[0] || 'https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600&q=80';
+  const h = r.harga||{};
+  const mapsBtn = r.maps ? `<a class="ex-badge ex-badge-maps" href="${esc(r.maps)}" target="_blank" onclick="event.stopPropagation()">📍 Maps</a>` : '';
+  const pdfUrl  = r.pdf  ? `https://docs.google.com/viewer?url=${encodeURIComponent(r.pdf)}&embedded=true` : '';
+  const pdfBtn  = r.pdf  ? `<a class="ex-badge ex-badge-pdf"  href="${pdfUrl}"  target="_blank" onclick="event.stopPropagation()">📄 Legalitas</a>` : '';
+  const adminBtns = isAdmin ? `
+    <button class="btn-sm btn-sm-navy" onclick="event.stopPropagation();openEditExisting('${r._key}')">Edit</button>
+    <button class="btn-sm btn-sm-red" style="flex:none;padding:7px 11px" onclick="event.stopPropagation();openDeleteExisting('${r._key}')">🗑</button>` : '';
+  return `<div class="ex-card" onclick="openExistingDetail('${r._key}')">
+    <img class="ex-card-img" src="${esc(thumb)}" onerror="this.src='https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600&q=80'" alt="">
+    <div class="ex-card-body">
+      <div class="ex-card-name">${esc(r.nama||'')}</div>
+      <div class="ex-card-addr">📍 ${esc(r.alamat||'')}</div>
+      <div class="ex-price-row">
+        ${[1,2,3,4,5].map(i=>`<div class="ex-yr"><div class="ex-yr-lbl">Thn ${i}</div><div class="ex-yr-val">${h['h'+i]?fmtRp(h['h'+i]):'—'}</div></div>`).join('')}
+      </div>
+      <div class="ex-badges">${mapsBtn}${pdfBtn}</div>
+      <div class="ex-card-actions" onclick="event.stopPropagation()">
+        <button class="btn-sm-outline" style="padding:7px 0;flex:1" onclick="openExistingDetail('${r._key}')">Detail</button>
+        ${adminBtns}
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ── DETAIL ── */
+window.openExistingDetail = function(key){
+  const r = EXISTING[key]; if(!r) return;
+  const fotos = r.fotos||[];
+  const h = r.harga||{};
+  let gallHTML = '';
+  if(!fotos.length) gallHTML = `<img src="https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600&q=80" style="width:100%;height:190px;object-fit:cover;border-radius:8px;margin-bottom:13px">`;
+  else if(fotos.length===1) gallHTML = `<div class="ex-det-gallery one"><img src="${esc(fotos[0])}" onclick="openLightbox(${JSON.stringify(fotos)},0)"></div>`;
+  else gallHTML = `<div class="ex-det-gallery multi">${fotos.map((f,i)=>`<img src="${esc(f)}" onclick="openLightbox(${JSON.stringify(fotos)},${i})">`).join('')}</div>`;
+
+  // Hitung kenaikan antar tahun
+  const hRows = [1,2,3,4,5].map(i=>{
+    const val = h['h'+i];
+    const prev = h['h'+(i-1)];
+    const diff = (val&&prev) ? ((val-prev)/prev*100) : null;
+    const diffBadge = diff!==null ? `<span class="ex-price-kenaikan" style="background:${diff>=0?'#dcfce7':'#fee2e2'};color:${diff>=0?'#16a34a':'#dc2626'}">${diff>=0?'+':''}${diff.toFixed(1)}%</span>` : '';
+    return `<tr><td style="font-weight:600">Tahun ${i}</td><td>${val?fmtFull(val):'—'}${diffBadge}</td></tr>`;
+  }).join('');
+
+  document.getElementById('existingDetailBody').innerHTML = `
+    ${gallHTML}
+    <div style="margin-bottom:13px">
+      <div style="font-size:18px;font-weight:800;color:#C0543A;margin-bottom:4px">${esc(r.nama||'')}</div>
+      <div style="font-size:13px;color:var(--muted)">📍 ${esc(r.alamat||'')}</div>
+    </div>
+    <div class="ex-docs-row">
+      ${r.maps?`<a class="btn-maps" href="${esc(r.maps)}" target="_blank">📍 Buka Google Maps</a>`:''}
+      ${r.pdf?`<a class="btn-pdf" href="https://docs.google.com/viewer?url=${encodeURIComponent(r.pdf)}&embedded=true" target="_blank">📄 Lihat Dokumen Legalitas</a>`:''}
+    </div>
+    <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:8px;text-transform:uppercase;letter-spacing:.6px">💰 Harga per Tahun</div>
+    <table class="ex-price-table" style="border-radius:10px;overflow:hidden">
+      <thead><tr><th>Tahun</th><th>Harga</th></tr></thead>
+      <tbody>${hRows}</tbody>
+    </table>
+    <div style="font-size:11px;color:#bbb;text-align:right">Ditambah: ${fmtDate(r.createdAt)}</div>`;
+  openModal('existingDetailOverlay');
+};
+
+/* ── FILE HANDLERS ── */
+window.handleFotoSelect = function(e){
+  const files = [...e.target.files];
+  exFotoFiles = [...exFotoFiles, ...files].slice(0,10);
+  renderFotoPreview();
+  e.target.value='';
+};
+
+function renderFotoPreview(){
+  const wrap = document.getElementById('exFotoPreview');
+  // Existing uploaded URLs
+  const uploadedHTML = exFotoUrls.map((url,i)=>`
+    <div class="up-thumb">
+      <img src="${esc(url)}" onerror="this.src=''">
+      <button class="up-thumb-del" onclick="removeUploadedFoto(${i})">×</button>
+    </div>`).join('');
+  // New local files
+  const newHTML = exFotoFiles.map((f,i)=>`
+    <div class="up-thumb" id="fotoThumb_${i}">
+      <img src="${URL.createObjectURL(f)}">
+      <button class="up-thumb-del" onclick="removeNewFoto(${i})">×</button>
+    </div>`).join('');
+  wrap.innerHTML = uploadedHTML + newHTML;
+}
+
+window.removeUploadedFoto = i => { exFotoUrls.splice(i,1); renderFotoPreview(); };
+window.removeNewFoto = i => { exFotoFiles.splice(i,1); renderFotoPreview(); };
+
+window.handlePdfSelect = function(e){
+  exPdfFile = e.target.files[0]||null;
+  const txt = document.getElementById('exPdfText');
+  txt.textContent = exPdfFile ? '📄 '+exPdfFile.name : 'Klik untuk pilih file PDF';
+};
+
+window.removeExistingPdf = function(){
+  exPdfUrl = '';
+  exPdfFile = null;
+  // Hide existing, show upload zone
+  const existingDiv = document.getElementById('exPdfExisting');
+  const uploadZone  = document.getElementById('exPdfUploadZone');
+  if(existingDiv) existingDiv.style.display='none';
+  if(uploadZone)  uploadZone.style.display='block';
+  document.getElementById('exPdfText').textContent='Klik untuk pilih file PDF';
+  document.getElementById('exPdfInput').value='';
+  showToast('🗑 File legalitas dihapus — klik Simpan untuk menyimpan perubahan');
+};
+
+// Drag & drop for foto zone
+function setupDragDrop(){
+  const zone = document.getElementById('exFotoZone');
+  if(!zone) return;
+  zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('dragover');});
+  zone.addEventListener('dragleave',()=>zone.classList.remove('dragover'));
+  zone.addEventListener('drop',e=>{
+    e.preventDefault(); zone.classList.remove('dragover');
+    const files=[...e.dataTransfer.files].filter(f=>f.type.startsWith('image/'));
+    exFotoFiles=[...exFotoFiles,...files].slice(0,10);
+    renderFotoPreview();
+  });
+}
+
+/* ── OPEN FORM ── */
+function clearExForm(){
+  ['exNama','exAlamat','exMaps','exH1','exH2','exH3','exH4','exH5'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('exFormId').value='';
+  document.getElementById('exFotoPreview').innerHTML='';
+  document.getElementById('exPdfText').textContent='Klik untuk pilih file PDF';
+  exFotoFiles=[]; exPdfFile=null; exFotoUrls=[]; exPdfUrl='';
+  // Reset PDF zone to upload state
+  const exPdfEx = document.getElementById('exPdfExisting');
+  const exPdfUZ = document.getElementById('exPdfUploadZone');
+  if(exPdfEx){ exPdfEx.style.display='none'; }
+  if(exPdfUZ){ exPdfUZ.style.display='block'; }
+}
+
+window.openAddExisting = function(){
+  if(!isAdmin){showToast('⛔ Hanya admin yang bisa menambah');return;}
+  clearExForm();
+  document.getElementById('existingFormTitle').textContent='Tambah Ruko Existing';
+  document.getElementById('exSaveBtn').textContent='💾 Simpan';
+  openModal('existingFormOverlay');
+  setTimeout(setupDragDrop,100);
+};
+
+window.openEditExisting = function(key){
+  if(!isAdmin){showToast('⛔ Hanya admin');return;}
+  const r=EXISTING[key]; if(!r) return;
+  clearExForm();
+  document.getElementById('exFormId').value=key;
+  document.getElementById('exNama').value=r.nama||'';
+  document.getElementById('exAlamat').value=r.alamat||'';
+  document.getElementById('exMaps').value=r.maps||'';
+  const h=r.harga||{};
+  [1,2,3,4,5].forEach(i=>{ if(h['h'+i]) document.getElementById('exH'+i).value=h['h'+i]; });
+  exFotoUrls=[...(r.fotos||[])]; exPdfUrl=r.pdf||''; exFotoFiles=[]; exPdfFile=null;
+  renderFotoPreview();
+  if(exPdfUrl){
+    // Show existing PDF with delete option
+    const existingDiv = document.getElementById('exPdfExisting');
+    const uploadZone  = document.getElementById('exPdfUploadZone');
+    if(existingDiv && uploadZone){
+      existingDiv.style.display='flex';
+      uploadZone.style.display='none';
+      const link = document.getElementById('exPdfExistingLink');
+      if(link){ link.href='https://docs.google.com/viewer?url='+encodeURIComponent(exPdfUrl)+'&embedded=true'; }
+    }
+  }
+  document.getElementById('existingFormTitle').textContent='Edit Ruko Existing';
+  document.getElementById('exSaveBtn').textContent='✓ Simpan Perubahan';
+  openModal('existingFormOverlay');
+  setTimeout(setupDragDrop,100);
+};
+
+/* ── SAVE ── */
+window.saveExisting = async function(){
+  const nama=document.getElementById('exNama').value.trim();
+  const alamat=document.getElementById('exAlamat').value.trim();
+  if(!nama||!alamat){showToast('⚠️ Nama dan Alamat wajib diisi');return;}
+  const btn=document.getElementById('exSaveBtn'); btn.disabled=true; btn.textContent='Menyimpan…';
+  const progWrap=document.getElementById('uploadProgressWrap');
+  const progBar=document.getElementById('uploadProgressBar');
+  const progLbl=document.getElementById('uploadProgressLabel');
+
+  try {
+    let uploadedFotos = [...exFotoUrls];
+    let finalPdf = exPdfUrl;
+    const totalFiles = exFotoFiles.length + (exPdfFile?1:0);
+    let done = 0;
+
+    // Upload foto baru
+    for(const file of exFotoFiles){
+      progWrap.style.display='block';
+      progLbl.textContent=`Mengupload foto (${done+1}/${totalFiles})…`;
+      const url = await uploadFile(file, 'existing/fotos/'+Date.now()+'_'+file.name, pct=>{
+        progBar.style.width=Math.round((done/totalFiles*100)+(pct/totalFiles))+'%';
+      });
+      uploadedFotos.push(url); done++;
+    }
+
+    // Upload PDF baru
+    if(exPdfFile){
+      progWrap.style.display='block';
+      progLbl.textContent='Mengupload PDF legalitas…';
+      finalPdf = await uploadFile(exPdfFile, 'existing/pdf/'+Date.now()+'_'+exPdfFile.name, pct=>{
+        progBar.style.width=Math.round((done/totalFiles*100)+(pct/totalFiles))+'%';
+      });
+      done++;
+    }
+    progBar.style.width='100%';
+
+    const now=Date.now();
+    const obj={
+      nama, alamat,
+      maps: document.getElementById('exMaps').value.trim(),
+      harga:{
+        h1:Number(document.getElementById('exH1').value)||0,
+        h2:Number(document.getElementById('exH2').value)||0,
+        h3:Number(document.getElementById('exH3').value)||0,
+        h4:Number(document.getElementById('exH4').value)||0,
+        h5:Number(document.getElementById('exH5').value)||0,
+      },
+      fotos: uploadedFotos,
+      pdf: finalPdf,
+      updatedAt: now,
+    };
+
+    const editKey=document.getElementById('exFormId').value;
+    if(editKey){
+      obj.createdAt=EXISTING[editKey]?.createdAt||now;
+      await set(ref(fbDb,'existing/'+editKey),obj);
+      showToast('✓ Ruko existing berhasil diperbarui');
+    } else {
+      obj.createdAt=now;
+      await push(ref(fbDb,'existing'),obj);
+      showToast('✓ Ruko existing berhasil ditambahkan');
+    }
+    closeModal('existingFormOverlay');
+    renderExisting();
+  } catch(e){ showToast('❌ '+e.message); }
+  finally{ btn.disabled=false; progWrap.style.display='none'; progBar.style.width='0%'; }
+};
+
+/* ── UPLOAD FILE via CLOUDINARY ── */
+async function uploadFile(file, _path, onProgress){
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', CLOUDINARY_PRESET);
+  formData.append('access_mode', 'public');  // pastikan file bisa diakses publik
+  // determine resource type
+  const isPdf = file.type === 'application/pdf';
+  // Untuk PDF: upload sebagai 'image' dengan fl_attachment agar bisa diakses
+  // atau tetap 'raw' tapi dengan access_mode public
+  const resourceType = isPdf ? 'raw' : 'image';
+  const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/${resourceType}/upload`;
+
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', url);
+    xhr.upload.onprogress = e => { if(e.lengthComputable) onProgress(Math.round(e.loaded/e.total*100)); };
+    xhr.onload = () => {
+      if(xhr.status===200){
+        const res = JSON.parse(xhr.responseText);
+        // Untuk PDF raw, gunakan secure_url langsung
+        // Ganti /raw/upload/ menjadi /raw/upload/fl_attachment/ agar browser bisa buka
+        let finalUrl = res.secure_url;
+        if(isPdf){
+          // Coba buka via Google Docs Viewer sebagai fallback jika direct gagal
+          finalUrl = res.secure_url;
+        }
+        resolve(finalUrl);
+      } else {
+        const errMsg = xhr.responseText ? JSON.parse(xhr.responseText).error?.message : xhr.statusText;
+        reject(new Error('Upload gagal: ' + errMsg));
+      }
+    };
+    xhr.onerror = () => reject(new Error('Upload gagal - cek koneksi internet'));
+    xhr.send(formData);
+  });
+}
+
+/* ── DELETE EXISTING ── */
+let pendingExDelKey=null;
+window.openDeleteExisting = function(key){
+  if(!isAdmin){showToast('⛔ Hanya admin');return;}
+  const r=EXISTING[key]; if(!r) return;
+  pendingExDelKey=key;
+  document.getElementById('deleteMsg').innerHTML=`Ruko "<strong>${esc(r.nama)}</strong>" beserta semua foto dan dokumen akan dihapus permanen.`;
+  document.getElementById('confirmDelBtn').onclick=confirmDeleteExisting;
+  openModal('deleteOverlay');
+};
+
+async function confirmDeleteExisting(){
+  const r=EXISTING[pendingExDelKey]; if(!r) return;
+  try{
+    await remove(ref(fbDb,'existing/'+pendingExDelKey));
+    closeModal('deleteOverlay');
+    renderExisting();
+    showToast('🗑 Ruko existing dihapus');
+  }catch(e){showToast('❌ '+e.message);}
+}
+
+
+/* ── SHARE RUKO ── */
+window.shareRuko = function(key){
+  const r = DB[key]; if(!r) return;
+  const baseUrl = window.location.origin + window.location.pathname;
+  const shareUrl = baseUrl + '?ruko=' + key;
+
+  // Preview card
+  const fotos = getFotos(r), thumb = fotos[0]||FALLBACK;
+  document.getElementById('shareRukoPreview').innerHTML = `
+    <div style="display:flex;gap:10px;align-items:center">
+      <img src="${esc(thumb)}" style="width:64px;height:52px;border-radius:7px;object-fit:cover;flex-shrink:0" onerror="this.src='${FALLBACK}'">
+      <div>
+        <div style="font-size:14px;font-weight:800;color:#C0543A">${esc(r.nama)}</div>
+        <div style="font-size:11px;color:var(--muted)">📍 ${esc(r.wilayah)}</div>
+        <div style="font-size:13px;font-weight:700;color:#2C1810;margin-top:2px">${fmtRp(r.harga)}</div>
+      </div>
+    </div>`;
+
+  // Set link
+  document.getElementById('shareLinkInput').value = shareUrl;
+
+  // WhatsApp share
+  const waText = `🏢 *${r.nama}*\n📍 ${r.wilayah}\n💰 ${fmtRp(r.harga)}\n\nLihat detail lengkapnya di sini:\n${shareUrl}`;
+  document.getElementById('shareWaBtn').href = 'https://wa.me/?text=' + encodeURIComponent(waText);
+
+  openModal('shareOverlay');
+};
+
+window.copyShareLink = function(){
+  const input = document.getElementById('shareLinkInput');
+  input.select(); input.setSelectionRange(0,9999);
+  try {
+    navigator.clipboard.writeText(input.value).then(()=>{
+      const btn = document.getElementById('copyLinkBtn');
+      btn.textContent = '✅ Copied!'; btn.style.background='#16a34a';
+      setTimeout(()=>{ btn.textContent='📋 Copy'; btn.style.background='#C0543A'; }, 2000);
+    });
+  } catch(e) {
+    document.execCommand('copy');
+    showToast('✅ Link berhasil dicopy!');
+  }
+};
+
+/* ── AUTO OPEN dari URL share ── */
+function checkShareUrl(){
+  const params = new URLSearchParams(window.location.search);
+  const rukoKey = params.get('ruko');
+  if(!rukoKey) return;
+  // Tunggu data Firebase load, lalu buka detail
+  const tryOpen = (attempt) => {
+    if(DB[rukoKey]){ openDetail(rukoKey); return; }
+    if(attempt < 20) setTimeout(()=>tryOpen(attempt+1), 300);
+  };
+  tryOpen(0);
+}
+
+
+/* ESC key */
+document.addEventListener('keydown', e => {
+  if(e.key==='Escape'){['formOverlay','detailOverlay','deleteOverlay','existingFormOverlay','existingDetailOverlay','shareOverlay'].forEach(closeModal);closeLightbox();}
+});
+</script>
+</body>
+</html>
