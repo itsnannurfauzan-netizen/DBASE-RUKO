@@ -1681,7 +1681,8 @@ function clearExForm(){
   exFotoFiles=[]; exFotoUrls=[]; exDocs=[];
   const docLabel = document.getElementById('exDocLabel');
   if(docLabel) docLabel.value='';
-  renderExDocs();
+  const docsWrap = document.getElementById('exDocsContainer');
+  if(docsWrap) docsWrap.innerHTML='';
 }
 
 window.openAddExisting = function(){
@@ -1690,7 +1691,7 @@ window.openAddExisting = function(){
   document.getElementById('existingFormTitle').textContent='Tambah Ruko Existing';
   document.getElementById('exSaveBtn').textContent='💾 Simpan';
   openModal('existingFormOverlay');
-  setTimeout(setupDragDrop,100);
+  setTimeout(()=>{ renderExDocs(); setupDragDrop(); }, 80);
 };
 
 window.openEditExisting = function(key){
@@ -1710,12 +1711,10 @@ window.openEditExisting = function(key){
   if(r.pdf && !exDocs.find(d=>d.url===r.pdf)){
     exDocs.unshift({label:'Legalitas', url:r.pdf, uploading:false, isNew:false});
   }
-  renderFotoPreview();
-  setTimeout(()=>renderExDocs(), 50);
   document.getElementById('existingFormTitle').textContent='Edit Ruko Existing';
   document.getElementById('exSaveBtn').textContent='✓ Simpan Perubahan';
   openModal('existingFormOverlay');
-  setTimeout(setupDragDrop,100);
+  setTimeout(()=>{ renderFotoPreview(); renderExDocs(); setupDragDrop(); }, 80);
 };
 
 /* ── SAVE ── */
