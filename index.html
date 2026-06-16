@@ -701,6 +701,24 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   </div>
 </div>
 
+<!-- MODAL: FILE VIEWER -->
+<div class="overlay" id="viewerOverlay" onclick="closeOnBg(event,'viewerOverlay')">
+  <div class="modal" style="max-width:95vw;width:95vw;max-height:97vh;margin:0">
+    <div class="modal-head" style="padding:10px 14px">
+      <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">
+        <div class="modal-title" id="viewerTitle" style="font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Preview</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+        <a id="viewerDownload" href="" target="_blank" download style="display:inline-flex;align-items:center;gap:4px;background:#fdf0eb;color:#C0543A;border:1.5px solid #EDD9D0;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:700;text-decoration:none">⬇️ Download</a>
+        <button class="btn-close" onclick="closeModal('viewerOverlay')">✕</button>
+      </div>
+    </div>
+    <div style="padding:0;overflow:hidden;border-radius:0 0 14px 14px">
+      <div id="viewerContent" style="width:100%;background:#1a1a1a"></div>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script type="module">
@@ -720,9 +738,13 @@ const firebaseConfig = {
 /* ── PASSWORD (ganti sesuai kebutuhan) ── */
 const ADMIN_PASS = "ruko2024";
 
-/* ── CLOUDINARY CONFIG ── */
+/* ── CLOUDINARY CONFIG (untuk foto/gambar) ── */
 const CLOUDINARY_CLOUD = "do9pf1s31";
 const CLOUDINARY_PRESET = "icc93up3";
+
+/* ── IMAGEKIT CONFIG (untuk PDF & dokumen) ── */
+const IK_ENDPOINT = "https://ik.imagekit.io/gwa4zzros";
+const IK_PUBLIC_KEY = "public_mNW9CKTlouIlMiDpBfMasVqFyk8=";
 
 let DB = {}, EXISTING = {}, fbDb, isAdmin = false;
 let currentView = 'grid';
@@ -1531,7 +1553,7 @@ function buildDocsHTML(r){
     html += '<div style="display:flex;align-items:center;justify-content:space-between;background:#fdf6f2;border:1px solid #EDD9D0;border-radius:8px;padding:8px 11px;margin-bottom:5px">';
     html += '<div style="display:flex;align-items:center;gap:7px"><span style="font-size:16px">📄</span>';
     html += '<span style="font-size:13px;font-weight:600;color:#2C1810">'+esc(d.label)+'</span></div>';
-    html += '<a href="'+viewUrl+'" target="_blank" class="doc-btn-view">👁 Lihat</a></div>';
+    html += '<button class="doc-btn-view" onclick="openFileViewer(\''+d.url+'\',\''+d.label+'\')" >👁 Lihat</button></div>';
   });
   html += '</div>';
   return html;
@@ -1544,7 +1566,7 @@ window.openExistingDetail = function(key){
   const h = r.harga||{};
   let gallHTML = '';
   if(!fotos.length) gallHTML = `<img src="https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600&q=80" style="width:100%;height:190px;object-fit:cover;border-radius:8px;margin-bottom:13px">`;
-  else if(fotos.length===1) gallHTML = `<div class="ex-det-gallery one"><img src="${esc(fotos[0])}" onclick="openLightbox(${JSON.stringify(fotos)},0)"></div>`;
+  else if(fotos.length===1) gallHTML = `<div class="ex-det-gallery one"><img src="${esc(fotos[0])}" onclick="openFileViewer('${esc(fotos[0])}','Foto Ruko')"></div>`;
   else gallHTML = `<div class="ex-det-gallery multi">${fotos.map((f,i)=>`<img src="${esc(f)}" onclick="openLightbox(${JSON.stringify(fotos)},${i})">`).join('')}</div>`;
 
   // Hitung kenaikan antar tahun
@@ -1652,7 +1674,7 @@ function renderExDocs(){
         </div>
       </div>
       <div class="doc-item-actions">
-        ${!d.uploading?`<a class="doc-btn-view" href="https://docs.google.com/viewer?url=${encodeURIComponent(d.url)}&embedded=true" target="_blank">👁 Lihat</a>`:''}
+        ${!d.uploading?`<button class="doc-btn-view" onclick="openFileViewer('${d.url}','${d.label}')">👁 Lihat</button>`:''}
         <button class="doc-btn-del" onclick="removeExDoc(${i})">🗑</button>
       </div>
     </div>`).join('');
@@ -1676,8 +1698,8 @@ function setupDragDrop(){
 function clearExForm(){
   ['exNama','exAlamat','exMaps','exH1','exH2','exH3','exH4','exH5'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('exFormId').value='';
-  document.getElementById('exFotoPreview').innerHTML='';
-  document.getElementById('exPdfText').textContent='Klik untuk pilih file PDF';
+  const exFP = document.getElementById('exFotoPreview'); if(exFP) exFP.innerHTML='';
+  const exPdfTxt = document.getElementById('exPdfText'); if(exPdfTxt) exPdfTxt.textContent='Klik untuk pilih file PDF';
   exFotoFiles=[]; exFotoUrls=[]; exDocs=[];
   const docLabel = document.getElementById('exDocLabel');
   if(docLabel) docLabel.value='';
@@ -1775,37 +1797,108 @@ window.saveExisting = async function(){
   finally{ btn.disabled=false; progWrap.style.display='none'; progBar.style.width='0%'; }
 };
 
-/* ── UPLOAD FILE via CLOUDINARY ── */
+/* ── UPLOAD FILE ──
+   Gambar/foto  → Cloudinary
+   PDF/dokumen  → ImageKit (bisa dipreview langsung)
+── */
 async function uploadFile(file, _path, onProgress){
+  const isPdf = file.type === 'application/pdf';
+  const isDoc = ['application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  ].includes(file.type);
+  const useImageKit = isPdf || isDoc;
+
+  if(useImageKit){
+    return uploadToImageKit(file, onProgress);
+  } else {
+    return uploadToCloudinary(file, onProgress);
+  }
+}
+
+/* Upload gambar ke Cloudinary */
+async function uploadToCloudinary(file, onProgress){
   const formData = new FormData();
   formData.append('file', file);
   formData.append('upload_preset', CLOUDINARY_PRESET);
-  // determine resource type
-  const isPdf = file.type === 'application/pdf';
-  const resourceType = isPdf ? 'raw' : 'image';
-  const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/${resourceType}/upload`;
-
+  const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`;
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open('POST', url);
     xhr.upload.onprogress = e => { if(e.lengthComputable) onProgress(Math.round(e.loaded/e.total*100)); };
     xhr.onload = () => {
-      if(xhr.status===200){
+      if(xhr.status===200){ resolve(JSON.parse(xhr.responseText).secure_url); }
+      else { reject(new Error('Upload foto gagal: '+(JSON.parse(xhr.responseText).error?.message||xhr.statusText))); }
+    };
+    xhr.onerror = () => reject(new Error('Upload gagal - cek koneksi'));
+    xhr.send(formData);
+  });
+}
+
+/* Upload PDF/dokumen ke ImageKit - langsung bisa dipreview */
+async function uploadToImageKit(file, onProgress){
+  // ImageKit upload menggunakan auth endpoint
+  // Step 1: Get auth params from ImageKit auth endpoint
+  let signature = '', expire = '', token = '';
+  try {
+    const authResp = await fetch(
+      `https://auth.imagekit.io/api/v1/upload-token/generate?publicKey=${IK_PUBLIC_KEY}`,
+      { method: 'GET', headers: { 'Accept': 'application/json' } }
+    );
+    if(authResp.ok){
+      const authData = await authResp.json();
+      signature = authData.signature || '';
+      expire = authData.expire || '';
+      token = authData.token || '';
+    }
+  } catch(e){ /* akan pakai fallback */ }
+
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('fileName', Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9._-]/g,'_'));
+  formData.append('publicKey', IK_PUBLIC_KEY);
+  if(signature) formData.append('signature', signature);
+  if(expire) formData.append('expire', String(expire));
+  if(token) formData.append('token', token);
+  formData.append('useUniqueFileName', 'true');
+  formData.append('folder', '/ruko-docs');
+
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', 'https://upload.imagekit.io/api/v2/files/upload');
+    xhr.upload.onprogress = e => { if(e.lengthComputable) onProgress(Math.round(e.loaded/e.total*100)); };
+    xhr.onload = () => {
+      try {
         const res = JSON.parse(xhr.responseText);
-        // Untuk PDF raw, gunakan secure_url langsung
-        // Ganti /raw/upload/ menjadi /raw/upload/fl_attachment/ agar browser bisa buka
-        let finalUrl = res.secure_url;
-        if(isPdf){
-          // Coba buka via Google Docs Viewer sebagai fallback jika direct gagal
-          finalUrl = res.secure_url;
+        if(xhr.status===200 && res.url){
+          resolve(res.url);
+        } else {
+          console.warn('ImageKit upload failed, falling back to Cloudinary:', res);
+          uploadToCloudinaryRaw(file, onProgress).then(resolve).catch(reject);
         }
-        resolve(finalUrl);
-      } else {
-        const errMsg = xhr.responseText ? JSON.parse(xhr.responseText).error?.message : xhr.statusText;
-        reject(new Error('Upload gagal: ' + errMsg));
+      } catch(e) {
+        uploadToCloudinaryRaw(file, onProgress).then(resolve).catch(reject);
       }
     };
-    xhr.onerror = () => reject(new Error('Upload gagal - cek koneksi internet'));
+    xhr.onerror = () => uploadToCloudinaryRaw(file, onProgress).then(resolve).catch(reject);
+    xhr.send(formData);
+  });
+}
+
+/* Fallback: Upload raw ke Cloudinary */
+async function uploadToCloudinaryRaw(file, onProgress){
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', CLOUDINARY_PRESET);
+  const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/raw/upload`;
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', url);
+    xhr.upload.onprogress = e => { if(e.lengthComputable) onProgress(Math.round(e.loaded/e.total*100)); };
+    xhr.onload = () => {
+      if(xhr.status===200){ resolve(JSON.parse(xhr.responseText).secure_url); }
+      else { reject(new Error('Upload dokumen gagal')); }
+    };
+    xhr.onerror = () => reject(new Error('Upload gagal - cek koneksi'));
     xhr.send(formData);
   });
 }
@@ -1831,6 +1924,36 @@ async function confirmDeleteExisting(){
   }catch(e){showToast('❌ '+e.message);}
 }
 
+
+
+/* ── FILE VIEWER ── */
+window.openFileViewer = function(url, label){
+  document.getElementById('viewerTitle').textContent = label || 'Preview';
+  document.getElementById('viewerDownload').href = url;
+  document.getElementById('viewerDownload').download = label || 'file';
+  const ext = url.split('.').pop().toLowerCase().split('?')[0];
+  const isImg = ['jpg','jpeg','png','webp','gif'].includes(ext);
+  const content = document.getElementById('viewerContent');
+  const vh = Math.round(window.innerHeight * 0.88);
+  if(isImg){
+    content.innerHTML = `<img src="${url}" style="max-width:100%;max-height:${vh}px;object-fit:contain;display:block;margin:0 auto">`;
+  } else {
+    const isImageKit = url.includes('ik.imagekit.io');
+    if(isImageKit){
+      // ImageKit PDF: embed langsung via iframe — bisa dipreview!
+      content.innerHTML = `<iframe src="${url}" style="width:100%;height:${vh}px;border:none;display:block" type="application/pdf"></iframe>`;
+    } else {
+      // File lama (Cloudinary): pakai Google Docs Viewer
+      const gdocsUrl = 'https://docs.google.com/viewer?url='+encodeURIComponent(url)+'&embedded=true';
+      content.innerHTML = `
+        <div style="background:#f5f5f5;padding:8px 14px;font-size:11px;color:#888;text-align:center">
+          ⚠️ File lama — untuk preview lebih baik, hapus & upload ulang
+        </div>
+        <iframe src="${gdocsUrl}" style="width:100%;height:${Math.round(vh*0.95)}px;border:none;display:block"></iframe>`;
+    }
+  }
+  openModal('viewerOverlay');
+};
 
 /* ── SHARE RUKO ── */
 window.shareRuko = function(key){
@@ -1891,7 +2014,7 @@ function checkShareUrl(){
 
 /* ESC key */
 document.addEventListener('keydown', e => {
-  if(e.key==='Escape'){['formOverlay','detailOverlay','deleteOverlay','existingFormOverlay','existingDetailOverlay','shareOverlay'].forEach(closeModal);closeLightbox();}
+  if(e.key==='Escape'){['formOverlay','detailOverlay','deleteOverlay','existingFormOverlay','existingDetailOverlay','shareOverlay','viewerOverlay'].forEach(closeModal);closeLightbox();}
 });
 </script>
 </body>
