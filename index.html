@@ -322,6 +322,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .doc-btn-del{background:#fee2e2;color:#dc2626;border:none;padding:5px 9px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer}
 .doc-uploading{opacity:.6;pointer-events:none}
 
+
+/* PDF CANVAS VIEWER */
+.pdf-viewer-wrap{width:100%;overflow-y:auto;background:#525659;padding:10px 0}
+.pdf-page-wrap{display:flex;justify-content:center;margin-bottom:8px}
+.pdf-page-wrap canvas{max-width:100%;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.pdf-nav{display:flex;align-items:center;justify-content:center;gap:10px;background:#323639;padding:8px;color:white;font-size:13px}
+.pdf-nav button{background:rgba(255,255,255,.15);color:white;border:none;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:13px;font-family:inherit}
+.pdf-nav button:hover{background:rgba(255,255,255,.25)}
+.pdf-nav button:disabled{opacity:.4;cursor:not-allowed}
+
 .ex-empty{text-align:center;padding:50px 20px;color:var(--muted)}
 
 .guest-badge{display:none;margin-left:7px;background:rgba(255,255,255,.2);padding:1px 8px;border-radius:9px;font-size:10px}
@@ -387,6 +397,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
   .list-thumb{width:60px;height:50px}
 }
 </style>
+<!-- PDF.js untuk render PDF langsung di browser -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+  if(typeof pdfjsLib !== 'undefined'){
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+</script>
 </head>
 <body>
 
@@ -745,6 +762,7 @@ const CLOUDINARY_PRESET = "icc93up3";
 /* ── IMAGEKIT CONFIG (untuk PDF & dokumen) ── */
 const IK_ENDPOINT = "https://ik.imagekit.io/gwa4zzros";
 const IK_PUBLIC_KEY = "public_mNW9CKTlouIlMiDpBfMasVqFyk8=";
+const IK_PRIVATE_KEY = "private_rkzPokIU3B8tbP2CSm6cpcu7HNo=";
 
 let DB = {}, EXISTING = {}, fbDb, isAdmin = false;
 let currentView = 'grid';
@@ -1836,35 +1854,22 @@ async function uploadToCloudinary(file, onProgress){
 
 /* Upload PDF/dokumen ke ImageKit - langsung bisa dipreview */
 async function uploadToImageKit(file, onProgress){
-  // ImageKit upload menggunakan auth endpoint
-  // Step 1: Get auth params from ImageKit auth endpoint
-  let signature = '', expire = '', token = '';
-  try {
-    const authResp = await fetch(
-      `https://auth.imagekit.io/api/v1/upload-token/generate?publicKey=${IK_PUBLIC_KEY}`,
-      { method: 'GET', headers: { 'Accept': 'application/json' } }
-    );
-    if(authResp.ok){
-      const authData = await authResp.json();
-      signature = authData.signature || '';
-      expire = authData.expire || '';
-      token = authData.token || '';
-    }
-  } catch(e){ /* akan pakai fallback */ }
-
+  // ImageKit upload dengan Basic Auth (private key)
+  const fileName = Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
   const formData = new FormData();
   formData.append('file', file);
-  formData.append('fileName', Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9._-]/g,'_'));
-  formData.append('publicKey', IK_PUBLIC_KEY);
-  if(signature) formData.append('signature', signature);
-  if(expire) formData.append('expire', String(expire));
-  if(token) formData.append('token', token);
-  formData.append('useUniqueFileName', 'true');
+  formData.append('fileName', fileName);
   formData.append('folder', '/ruko-docs');
+  formData.append('useUniqueFileName', 'true');
+  formData.append('isPrivateFile', 'false');
+
+  // Basic auth: privateKey:  (private key + colon + empty string, base64)
+  const basicAuth = btoa(IK_PRIVATE_KEY + ':');
 
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open('POST', 'https://upload.imagekit.io/api/v2/files/upload');
+    xhr.setRequestHeader('Authorization', 'Basic ' + basicAuth);
     xhr.upload.onprogress = e => { if(e.lengthComputable) onProgress(Math.round(e.loaded/e.total*100)); };
     xhr.onload = () => {
       try {
@@ -1872,7 +1877,7 @@ async function uploadToImageKit(file, onProgress){
         if(xhr.status===200 && res.url){
           resolve(res.url);
         } else {
-          console.warn('ImageKit upload failed, falling back to Cloudinary:', res);
+          console.warn('ImageKit gagal:', res.message || xhr.status);
           uploadToCloudinaryRaw(file, onProgress).then(resolve).catch(reject);
         }
       } catch(e) {
@@ -1927,6 +1932,8 @@ async function confirmDeleteExisting(){
 
 
 /* ── FILE VIEWER ── */
+let pdfDoc=null,pdfCurrentPage=1,pdfTotalPages=0,pdfCurrentUrl='';
+
 window.openFileViewer = function(url, label){
   document.getElementById('viewerTitle').textContent = label || 'Preview';
   document.getElementById('viewerDownload').href = url;
@@ -1936,24 +1943,62 @@ window.openFileViewer = function(url, label){
   const content = document.getElementById('viewerContent');
   const vh = Math.round(window.innerHeight * 0.88);
   if(isImg){
-    content.innerHTML = `<img src="${url}" style="max-width:100%;max-height:${vh}px;object-fit:contain;display:block;margin:0 auto">`;
+    content.innerHTML = `<div style="background:#1a1a1a;padding:10px;min-height:${vh}px;display:flex;align-items:center;justify-content:center"><img src="${url}" style="max-width:100%;max-height:${vh}px;object-fit:contain;display:block"></div>`;
+    openModal('viewerOverlay');
   } else {
-    const isImageKit = url.includes('ik.imagekit.io');
-    if(isImageKit){
-      // ImageKit PDF: embed langsung via iframe — bisa dipreview!
-      content.innerHTML = `<iframe src="${url}" style="width:100%;height:${vh}px;border:none;display:block" type="application/pdf"></iframe>`;
-    } else {
-      // File lama (Cloudinary): pakai Google Docs Viewer
-      const gdocsUrl = 'https://docs.google.com/viewer?url='+encodeURIComponent(url)+'&embedded=true';
-      content.innerHTML = `
-        <div style="background:#f5f5f5;padding:8px 14px;font-size:11px;color:#888;text-align:center">
-          ⚠️ File lama — untuk preview lebih baik, hapus & upload ulang
-        </div>
-        <iframe src="${gdocsUrl}" style="width:100%;height:${Math.round(vh*0.95)}px;border:none;display:block"></iframe>`;
-    }
+    content.innerHTML = `
+      <div class="pdf-nav">
+        <button onclick="pdfPrevPage()" id="pdfPrev" disabled>◀ Prev</button>
+        <span id="pdfPageInfo">Memuat PDF...</span>
+        <button onclick="pdfNextPage()" id="pdfNext" disabled>Next ▶</button>
+      </div>
+      <div class="pdf-viewer-wrap" id="pdfWrap" style="height:${vh-48}px">
+        <div class="pdf-page-wrap"><canvas id="pdfCanvas"></canvas></div>
+      </div>`;
+    openModal('viewerOverlay');
+    setTimeout(()=>renderPdfFromUrl(url), 100);
   }
-  openModal('viewerOverlay');
 };
+
+async function renderPdfFromUrl(url){
+  if(typeof pdfjsLib==='undefined'){
+    document.getElementById('pdfPageInfo').textContent='PDF.js tidak tersedia';return;
+  }
+  try{
+    pdfCurrentUrl=url; pdfCurrentPage=1;
+    pdfDoc=await pdfjsLib.getDocument({url,withCredentials:false}).promise;
+    pdfTotalPages=pdfDoc.numPages;
+    await renderPdfPage(1);
+  }catch(e){
+    console.error(e);
+    document.getElementById('pdfWrap').innerHTML=`
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:14px;color:white;padding:20px;text-align:center">
+        <div style="font-size:40px">📄</div>
+        <div style="font-size:14px;font-weight:600">Tidak bisa render PDF</div>
+        <div style="font-size:12px;opacity:.7">${e.message||'CORS atau file tidak tersedia'}</div>
+        <a href="${url}" target="_blank" style="background:#C0543A;color:white;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:700">⬇️ Download PDF</a>
+      </div>`;
+  }
+}
+
+async function renderPdfPage(pageNum){
+  if(!pdfDoc) return;
+  const page=await pdfDoc.getPage(pageNum);
+  const canvas=document.getElementById('pdfCanvas');
+  if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  const vw=Math.min(window.innerWidth*0.92,700);
+  const viewport=page.getViewport({scale:vw/page.getViewport({scale:1}).width});
+  canvas.height=viewport.height; canvas.width=viewport.width;
+  await page.render({canvasContext:ctx,viewport}).promise;
+  document.getElementById('pdfPageInfo').textContent=`Halaman ${pageNum} / ${pdfTotalPages}`;
+  document.getElementById('pdfPrev').disabled=pageNum<=1;
+  document.getElementById('pdfNext').disabled=pageNum>=pdfTotalPages;
+  pdfCurrentPage=pageNum;
+}
+
+window.pdfPrevPage=async()=>{if(pdfCurrentPage>1) await renderPdfPage(pdfCurrentPage-1);};
+window.pdfNextPage=async()=>{if(pdfCurrentPage<pdfTotalPages) await renderPdfPage(pdfCurrentPage+1);};
 
 /* ── SHARE RUKO ── */
 window.shareRuko = function(key){
