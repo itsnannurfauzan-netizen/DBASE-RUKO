@@ -540,15 +540,51 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
           <input class="fi" id="exMaps" placeholder="cth. https://maps.app.goo.gl/xxx atau -6.200000,106.816666">
           <div style="font-size:11px;color:var(--muted);margin-top:4px">💡 Buka Google Maps → tahan titik lokasi → copy link Share atau koordinat</div>
         </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="fg">
+            <label class="flbl">Kontak Pemilik / Agen</label>
+            <input class="fi" id="exKontak" placeholder="cth. Budi Santoso">
+          </div>
+          <div class="fg">
+            <label class="flbl">No. WhatsApp</label>
+            <input class="fi" id="exWa" type="tel" placeholder="cth. 08123456789">
+          </div>
+        </div>
         <div class="fg full">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+            <div class="fg">
+              <label class="flbl">Harga Deposit (Rp)</label>
+              <input class="fi" id="exDeposit" type="number" placeholder="cth. 10000000">
+            </div>
+            <div class="fg">
+              <label class="flbl">Kenaikan / Tahun (%)</label>
+              <input class="fi" id="exKenaikan" type="number" step="0.1" placeholder="cth. 5" oninput="autoHitungEx()">
+            </div>
+          </div>
           <label class="flbl">Harga per Tahun (Rp)</label>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
-            <div><div style="font-size:11px;color:var(--muted);margin-bottom:3px">Tahun 1</div><input class="fi" id="exH1" type="number" placeholder="cth. 50000000"></div>
-            <div><div style="font-size:11px;color:var(--muted);margin-bottom:3px">Tahun 2</div><input class="fi" id="exH2" type="number" placeholder="cth. 52000000"></div>
-            <div><div style="font-size:11px;color:var(--muted);margin-bottom:3px">Tahun 3</div><input class="fi" id="exH3" type="number" placeholder="cth. 55000000"></div>
-            <div><div style="font-size:11px;color:var(--muted);margin-bottom:3px">Tahun 4</div><input class="fi" id="exH4" type="number" placeholder="cth. 57000000"></div>
-            <div><div style="font-size:11px;color:var(--muted);margin-bottom:3px">Tahun 5</div><input class="fi" id="exH5" type="number" placeholder="cth. 60000000"></div>
+            <div>
+              <div style="font-size:11px;color:var(--muted);margin-bottom:3px">Tahun 1 *</div>
+              <input class="fi" id="exH1" type="number" placeholder="cth. 50000000" oninput="autoHitungEx()">
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--muted);margin-bottom:3px">Tahun 2 <span id="exH2Label" style="color:var(--gold);font-size:10px"></span></div>
+              <input class="fi" id="exH2" type="number" placeholder="otomatis" style="background:#fdf6f2">
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--muted);margin-bottom:3px">Tahun 3 <span id="exH3Label" style="color:var(--gold);font-size:10px"></span></div>
+              <input class="fi" id="exH3" type="number" placeholder="otomatis" style="background:#fdf6f2">
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--muted);margin-bottom:3px">Tahun 4 <span id="exH4Label" style="color:var(--gold);font-size:10px"></span></div>
+              <input class="fi" id="exH4" type="number" placeholder="otomatis" style="background:#fdf6f2">
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--muted);margin-bottom:3px">Tahun 5 <span id="exH5Label" style="color:var(--gold);font-size:10px"></span></div>
+              <input class="fi" id="exH5" type="number" placeholder="otomatis" style="background:#fdf6f2">
+            </div>
           </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:5px">💡 Isi Tahun 1 + % Kenaikan → Tahun 2-5 terisi otomatis. Atau isi manual.</div>
         </div>
         <div class="fg full">
           <label class="flbl">Foto Ruko (bisa lebih dari 1, max 5MB/foto)</label>
@@ -612,8 +648,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         <div class="fg"><label class="flbl">Wilayah / Kota *</label><input class="fi" id="fWilayah" placeholder="cth. Jakarta Barat"></div>
         <div class="fg"><label class="flbl">Status</label><select class="fs" id="fStatus"><option>Review MoU</option><option>MoU Disetujui</option><option>MoU Ditolak</option><option>Pending Pembayaran</option><option>Sold</option><option>DONE</option></select></div>
         <div class="fg full"><label class="flbl">Alamat Lengkap *</label><textarea class="fta" id="fAlamat" placeholder="Jl. ..., No. ..., Kecamatan, Kota"></textarea></div>
-        <div class="fg"><label class="flbl">Harga (Rp) *</label><input class="fi" id="fHarga" type="number" placeholder="cth. 4500000000"></div>
-        <div class="fg"><label class="flbl">Kenaikan / Tahun (%)</label><input class="fi" id="fKenaikan" type="number" step="0.1" placeholder="cth. 8.5"></div>
+        <div class="fg"><label class="flbl">Harga (Rp) *</label><input class="fi" id="fHarga" type="number" placeholder="cth. 4500000000" oninput="syncHargaToSewa()"></div>
+        <div class="fg"><label class="flbl">Kenaikan / Tahun (%)</label><input class="fi" id="fKenaikan" type="number" step="0.1" placeholder="cth. 8.5" oninput="syncKenaikanToSewa()"></div>
         <div class="fg"><label class="flbl">Luas (m²)</label><input class="fi" id="fLuas" type="number" placeholder="cth. 120"></div>
         <div class="fg"><label class="flbl">Jumlah Lantai</label><input class="fi" id="fLantai" type="number" placeholder="cth. 3"></div>
         <div class="fg"><label class="flbl">Kontak Pemilik / Agen</label><input class="fi" id="fKontak" placeholder="cth. Budi Santoso"></div>
@@ -622,6 +658,42 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
           <label class="flbl">Titik Google Maps (URL)</label>
           <input class="fi" id="fMaps" type="url" placeholder="cth. https://maps.app.goo.gl/xxx">
           <div style="font-size:11px;color:var(--muted);margin-top:3px">💡 Buka Google Maps → tahan titik lokasi → klik Share → copy link</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="fg">
+            <label class="flbl">Harga Deposit (Rp)</label>
+            <input class="fi" id="fDeposit" type="number" placeholder="cth. 10000000">
+          </div>
+          <div class="fg">
+            <label class="flbl">Kenaikan Sewa / Tahun (%)</label>
+            <input class="fi" id="fKenaikanSewa" type="number" step="0.1" placeholder="cth. 5" oninput="this.dataset.manualEdit='1';autoHitungListing()">
+          </div>
+        </div>
+        <div class="fg full">
+          <label class="flbl">Harga Sewa per Tahun (Rp)</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
+            <div>
+              <div style="font-size:11px;color:var(--muted);margin-bottom:3px">Tahun 1</div>
+              <input class="fi" id="fSewa1" type="number" placeholder="cth. 50000000" oninput="this.dataset.manualEdit='1';autoHitungListing()">
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--muted);margin-bottom:3px">Tahun 2 <span id="fSewa2Lbl" style="color:#C0543A;font-size:10px"></span></div>
+              <input class="fi" id="fSewa2" type="number" placeholder="otomatis" style="background:#fdf6f2">
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--muted);margin-bottom:3px">Tahun 3 <span id="fSewa3Lbl" style="color:#C0543A;font-size:10px"></span></div>
+              <input class="fi" id="fSewa3" type="number" placeholder="otomatis" style="background:#fdf6f2">
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--muted);margin-bottom:3px">Tahun 4 <span id="fSewa4Lbl" style="color:#C0543A;font-size:10px"></span></div>
+              <input class="fi" id="fSewa4" type="number" placeholder="otomatis" style="background:#fdf6f2">
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--muted);margin-bottom:3px">Tahun 5 <span id="fSewa5Lbl" style="color:#C0543A;font-size:10px"></span></div>
+              <input class="fi" id="fSewa5" type="number" placeholder="otomatis" style="background:#fdf6f2">
+            </div>
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">💡 Isi Tahun 1 + % Kenaikan → Tahun 2-5 otomatis terhitung</div>
         </div>
         <div class="fg full">
           <label class="flbl">Label / Tag (Enter atau koma untuk tambah)</label>
@@ -939,6 +1011,8 @@ function cardHTML(r){
       ${r.kontak?`<div class="card-contact">👤 ${esc(r.kontak)}${r.wa?` · 📱 ${esc(r.wa)}`:''}</div>`:''}
       ${r.maps?`<div style="margin-bottom:6px"><a href="${esc(r.maps)}" target="_blank" onclick="event.stopPropagation()" style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:#2e7d32;background:#e8f5e9;padding:3px 9px;border-radius:8px;text-decoration:none">📍 Lihat Maps</a></div>`:''}
       <div class="card-price">${fmtRp(r.harga)}</div>
+      ${r.deposit?`<div style="font-size:11px;color:#C0543A;font-weight:600">🏷️ Deposit: ${fmtRp(r.deposit)}</div>`:''}
+      ${r.sewa&&r.sewa.s1?`<div style="font-size:11px;color:var(--muted)">💰 Sewa Thn 1: ${fmtRp(r.sewa.s1)}</div>`:''}
       <div class="card-meta">${r.luas||0}m² · ${r.lantai||0} lantai · ${fmtDate(r.updatedAt)}</div>
       <div class="card-actions" onclick="event.stopPropagation()">
         <button class="btn-sm-outline" onclick="openDetail('${r._key}')">Detail</button>
@@ -976,9 +1050,7 @@ function listHTML(r){
 window.openDetail = key => {
   const r=DB[key]; if(!r) return;
   const fotos=getFotos(r);
-  const h1=r.harga*(1+r.kenaikan/100), h3=r.harga*Math.pow(1+r.kenaikan/100,3), h5=r.harga*Math.pow(1+r.kenaikan/100,5);
   const tc=tcol(r.kenaikan||0);
-  const history=r.priceHistory?Object.values(r.priceHistory).sort((a,b)=>b.ts-a.ts):[];
   const tags=(r.tags||[]).map(t=>`<span class="det-tag">${esc(t)}</span>`).join('');
   const waLink=r.wa?`https://wa.me/${r.wa.replace(/\D/g,'')}?text=Halo,%20saya%20tertarik%20dengan%20${encodeURIComponent(r.nama)}`:'';
 
@@ -988,14 +1060,7 @@ window.openDetail = key => {
   else if(fotos.length===1) gallHTML=`<div class="gallery one"><img src="${esc(fotos[0])}" onerror="this.src='${FALLBACK}'" onclick="openLightbox(${fotosJSON},0)"></div>`;
   else gallHTML=`<div class="gallery multi">${fotos.map((f,i)=>`<img src="${esc(f)}" onerror="this.src='${FALLBACK}'" onclick="openLightbox(${fotosJSON},${i})">`).join('')}</div>`;
 
-  let histHTML='';
-  if(history.length>1){
-    histHTML=`<div class="history-box"><div class="box-title">📜 Riwayat Harga</div>`+
-    history.map((h,i)=>{
-      const prev=history[i+1], diff=prev?((h.harga-prev.harga)/prev.harga*100):0;
-      return `<div class="hist-row"><span class="hist-date">${fmtDate(h.ts)}</span><span class="hist-price">${fmtRp(h.harga)}</span>${prev?`<span class="hist-diff" style="background:${diff>=0?'#dcfce7':'#fee2e2'};color:${diff>=0?'#16a34a':'#dc2626'}">${diff>=0?'+':''}${diff.toFixed(1)}%</span>`:''}</div>`;
-    }).join('')+`</div>`;
-  }
+
 
   document.getElementById('detailBody').innerHTML=`
     ${gallHTML}
@@ -1013,14 +1078,9 @@ window.openDetail = key => {
       <div><div class="det-ilbl">Luas Bangunan</div><div class="det-ival" style="font-size:14px">${r.luas||0} m²</div></div>
       <div><div class="det-ilbl">Jumlah Lantai</div><div class="det-ival" style="font-size:14px">${r.lantai||0} Lantai</div></div>
     </div>
+    ${buildSewaHTML(r)}
     ${r.catatan?`<div class="catatan-box"><div class="box-title">📝 Catatan</div><div class="catatan-txt">${esc(r.catatan)}</div></div>`:''}
-    ${histHTML}
-    <div class="proyeksi-box">
-      <div class="box-title">📈 Proyeksi Kenaikan Harga</div>
-      <div class="proy-row"><span class="proy-lbl">1 Tahun lagi</span><span class="proy-val">${fmtRp(h1)}</span></div>
-      <div class="proy-row"><span class="proy-lbl">3 Tahun lagi</span><span class="proy-val">${fmtRp(h3)}</span></div>
-      <div class="proy-row"><span class="proy-lbl">5 Tahun lagi</span><span class="proy-val gold">${fmtRp(h5)}</span></div>
-    </div>
+
     <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
       <div class="det-meta" style="margin:0">Ditambah: ${fmtDate(r.createdAt)} · Diupdate: ${fmtDate(r.updatedAt)}</div>
       <button onclick="shareRuko('${key}')" style="display:inline-flex;align-items:center;gap:5px;background:#fdf0eb;color:#C0543A;border:1.5px solid #EDD9D0;padding:7px 13px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">🔗 Share</button>
@@ -1100,7 +1160,8 @@ function setupListingDragDrop(){
 
 /* ── FORM ── */
 function clearForm(){
-  ['fNama','fWilayah','fAlamat','fHarga','fKenaikan','fLuas','fLantai','fKontak','fWa','fMaps','fCatatan'].forEach(id=>document.getElementById(id).value='');
+  ['fNama','fWilayah','fAlamat','fHarga','fKenaikan','fLuas','fLantai','fKontak','fWa','fMaps','fDeposit','fKenaikanSewa','fSewa1','fSewa2','fSewa3','fSewa4','fSewa5','fCatatan'].forEach(id=>{ const el=document.getElementById(id); if(el){ el.value=''; delete el.dataset.manualEdit; } });
+  [2,3,4,5].forEach(i=>{ const l=document.getElementById('fSewa'+i+'Lbl'); if(l) l.textContent=''; });
   document.getElementById('fStatus').value='Review MoU'; document.getElementById('formId').value='';
   listingFotoFiles=[]; listingFotoUrls=[];
   const lprev=document.getElementById('listingFotoPreview'); if(lprev) lprev.innerHTML='';
@@ -1123,7 +1184,12 @@ window.openEdit = key => {
   document.getElementById('fKenaikan').value=r.kenaikan||''; document.getElementById('fLuas').value=r.luas||'';
   document.getElementById('fLantai').value=r.lantai||''; document.getElementById('fKontak').value=r.kontak||'';
   document.getElementById('fWa').value=r.wa||'';
-  document.getElementById('fMaps').value=r.maps||''; document.getElementById('fCatatan').value=r.catatan||'';
+  document.getElementById('fMaps').value=r.maps||'';
+  const fDep=document.getElementById('fDeposit'); if(fDep) fDep.value=r.deposit||'';
+  const fKenSewa=document.getElementById('fKenaikanSewa'); if(fKenSewa){ fKenSewa.value=r.kenaikanSewa||''; if(r.kenaikanSewa) fKenSewa.dataset.manualEdit='1'; }
+  // Jika tidak ada data sewa, sync dari harga & kenaikan
+  setTimeout(()=>{ if(!r.sewa?.s1){ syncHargaToSewa(); } if(!r.kenaikanSewa){ syncKenaikanToSewa(); } }, 50);
+  [1,2,3,4,5].forEach(i=>{ const el=document.getElementById('fSewa'+i); if(el) el.value=r.sewa&&r.sewa['s'+i]?r.sewa['s'+i]:''; }); document.getElementById('fCatatan').value=r.catatan||'';
   listingFotoUrls=[...getFotos(r)]; listingFotoFiles=[];
   formTags=[...(r.tags||[])]; renderTagChips();
   document.getElementById('fStatus').value=r.status||'Review MoU';
@@ -1152,6 +1218,15 @@ window.saveForm = async () => {
     luas:parseInt(document.getElementById('fLuas').value)||0,lantai:parseInt(document.getElementById('fLantai').value)||0,
     kontak:document.getElementById('fKontak').value.trim(),wa:document.getElementById('fWa').value.trim(),
     maps:document.getElementById('fMaps').value.trim(),
+    deposit:Number(document.getElementById('fDeposit')?.value)||0,
+    kenaikanSewa:parseFloat(document.getElementById('fKenaikanSewa')?.value)||0,
+    sewa:{
+      s1:Number(document.getElementById('fSewa1')?.value)||0,
+      s2:Number(document.getElementById('fSewa2')?.value)||0,
+      s3:Number(document.getElementById('fSewa3')?.value)||0,
+      s4:Number(document.getElementById('fSewa4')?.value)||0,
+      s5:Number(document.getElementById('fSewa5')?.value)||0,
+    },
     catatan:document.getElementById('fCatatan').value.trim(),fotos,tags:formTags,
     status:document.getElementById('fStatus').value,updatedAt:now};
   try{
@@ -1163,6 +1238,14 @@ window.saveForm = async () => {
       }
       obj.priceHistory=history; obj.createdAt=prev?.createdAt||now;
       await set(ref(fbDb,'ruko/'+editKey),obj); showToast('✓ Listing berhasil diperbarui');
+      // Jika status DONE, tawarkan pindah ke Existing
+      if(obj.status==='DONE'){
+        setTimeout(()=>{
+          if(confirm('Status sudah DONE!\n\nPindahkan ruko ini ke tab Ruko Existing sekarang?\n(Data listing akan dihapus dan masuk ke Existing)')){
+            moveToExisting(editKey);
+          }
+        }, 500);
+      }
     } else {
       obj.createdAt=now; obj.priceHistory={[now]:{harga,ts:now}};
       await push(ref(fbDb,'ruko'),obj); showToast('✓ Listing berhasil ditambahkan');
@@ -1172,6 +1255,65 @@ window.saveForm = async () => {
   finally{btn.disabled=false;}
 };
 
+
+/* ── PINDAH KE EXISTING (dari DONE) ── */
+window.moveToExisting = async function(key){
+  if(!isAdmin){ showToast('⛔ Hanya admin'); return; }
+  const r = DB[key]; if(!r) return;
+  try {
+    const now = Date.now();
+    const origData = JSON.parse(JSON.stringify(r));
+    const exObj = {
+      nama: r.nama,
+      wilayah: r.wilayah || '',
+      alamat: r.alamat || '',
+      maps: r.maps || '',
+      deposit: r.deposit || 0,
+      kenaikan: r.kenaikanSewa || r.kenaikan || 0,
+      harga: (()=>{
+        // Ambil harga dari sewa listing atau fallback ke harga utama
+        const baseH1 = r.sewa?.s1 || r.sewa?.h1 || r.harga || 0;
+        const pct = r.kenaikanSewa || r.kenaikan || 0;
+        const mult = 1 + pct/100;
+        // Gunakan nilai dari sewa jika ada, kalau tidak auto-hitung dari %
+        const h1 = baseH1;
+        const h2 = r.sewa?.s2 || r.sewa?.h2 || (pct && h1 ? Math.round(h1*mult) : 0);
+        const h3 = r.sewa?.s3 || r.sewa?.h3 || (pct && h1 ? Math.round(h1*Math.pow(mult,2)) : 0);
+        const h4 = r.sewa?.s4 || r.sewa?.h4 || (pct && h1 ? Math.round(h1*Math.pow(mult,3)) : 0);
+        const h5 = r.sewa?.s5 || r.sewa?.h5 || (pct && h1 ? Math.round(h1*Math.pow(mult,4)) : 0);
+        return {h1, h2, h3, h4, h5};
+      })(),
+      fotos: r.fotos || [],
+      docs: r.docs || [],
+      catatan: r.catatan || '',
+      tags: r.tags || [],
+      kontak: r.kontak || '',
+      wa: r.wa || '',
+      createdAt: now,
+      updatedAt: now,
+      _fromListing: true,
+      _listingData: origData,
+    };
+    const newRef = await push(ref(fbDb,'existing'), exObj);
+    await remove(ref(fbDb,'ruko/'+key));
+    showToastWithUndo(
+      '✅ Dipindahkan ke Ruko Existing',
+      '↩️ Kembalikan',
+      async ()=>{
+        try{
+          const restoreData = {...origData};
+          delete restoreData._key;
+          restoreData.status = 'DONE';
+          restoreData.updatedAt = Date.now();
+          await push(ref(fbDb,'ruko'), restoreData);
+          await remove(ref(fbDb,'existing/'+newRef.key));
+          showToast('↩️ Ruko dikembalikan ke Listing');
+        } catch(e){ showToast('❌ '+e.message); }
+      }
+    );
+    renderCards();
+  } catch(e){ showToast('❌ '+e.message); }
+};
 /* ── DUPLICATE ── */
 window.dupListing = async key => {
   if(!isAdmin){showToast('⛔ Tamu tidak bisa menduplikat');return;}
@@ -1247,7 +1389,8 @@ window.closeOnBg  = (e,id) => {if(e.target.id===id) closeModal(id);};
 let toastT;
 window.showToast = msg => {
   const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show');
-  clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('show'),2800);
+  clearTimeout(toastT); clearTimeout(undoTimer);
+  toastT=setTimeout(()=>{ el.classList.remove('show'); }, 2800);
 };
 
 
@@ -1518,10 +1661,15 @@ function exListHTML(r){
   const harga1 = h.h1 ? fmtRp(h.h1) : '—';
   const harga5 = h.h5 ? fmtRp(h.h5) : '—';
   const mapsBtn = r.maps ? `<a class="ex-badge ex-badge-maps" href="${esc(r.maps)}" target="_blank" onclick="event.stopPropagation()">📍 Maps</a>` : '';
+  const depositBadge = r.deposit ? `<span class="ex-badge" style="background:#fdf0eb;color:#C0543A">🏷️ Deposit: ${fmtRp(r.deposit)}</span>` : '';
+  const kontakBadge = r.kontak ? `<div class="card-contact">👤 ${esc(r.kontak)}${r.wa?' · 📱 '+esc(r.wa):''}</div>` : '';
   const allDocsL = [...(r.docs||[])];
   if(r.pdf && !allDocsL.find(d=>d.url===r.pdf)) allDocsL.unshift({label:'Legalitas',url:r.pdf});
   const pdfBtn = allDocsL.length ? `<span class="ex-badge ex-badge-pdf" onclick="event.stopPropagation();openExistingDetail('${r._key}')">📁 ${allDocsL.length} Dok</span>` : '';
-  const adminBtns = isAdmin ? `
+  const restoreBtnL = isAdmin && r._fromListing
+    ? `<button class="btn-sm" style="background:#2563eb;color:white;flex:none;padding:5px 10px;font-size:11px;font-weight:700;border:none;border-radius:6px;cursor:pointer;font-family:inherit" onclick="event.stopPropagation();restoreToListing('${r._key}')">↩️</button>`
+    : '';
+  const adminBtns = isAdmin ? `${restoreBtnL}
     <button class="btn-sm btn-sm-navy" style="padding:5px 10px;flex:none" onclick="event.stopPropagation();openEditExisting('${r._key}')">✏️</button>
     <button class="btn-sm btn-sm-red" style="padding:5px 10px;flex:none" onclick="event.stopPropagation();openDeleteExisting('${r._key}')">🗑</button>` : '';
   return `<div class="list-card" onclick="openExistingDetail('${r._key}')">
@@ -1547,10 +1695,15 @@ function exCardHTML(r){
   const thumb = fotos[0] || 'https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600&q=80';
   const h = r.harga||{};
   const mapsBtn = r.maps ? `<a class="ex-badge ex-badge-maps" href="${esc(r.maps)}" target="_blank" onclick="event.stopPropagation()">📍 Maps</a>` : '';
+  const depositBadge = r.deposit ? `<span class="ex-badge" style="background:#fdf0eb;color:#C0543A">🏷️ Deposit: ${fmtRp(r.deposit)}</span>` : '';
+  const kontakBadge = r.kontak ? `<div class="card-contact">👤 ${esc(r.kontak)}${r.wa?' · 📱 '+esc(r.wa):''}</div>` : '';
   const allDocs = [...(r.docs||[])];
   if(r.pdf && !allDocs.find(d=>d.url===r.pdf)) allDocs.unshift({label:'Legalitas',url:r.pdf});
   const pdfBtn = allDocs.length ? `<span class="ex-badge ex-badge-pdf" onclick="event.stopPropagation();openExistingDetail('${r._key}')">📁 ${allDocs.length} Dokumen</span>` : '';
-  const adminBtns = isAdmin ? `
+  const restoreBtn = isAdmin && r._fromListing
+    ? `<button class="btn-sm" style="background:#2563eb;color:white;flex:none;padding:7px 10px;font-size:11px;font-weight:700;border:none;border-radius:6px;cursor:pointer;font-family:inherit" onclick="event.stopPropagation();restoreToListing('${r._key}')" title="Kembalikan ke Listing">↩️ Listing</button>`
+    : '';
+  const adminBtns = isAdmin ? `${restoreBtn}
     <button class="btn-sm btn-sm-navy" onclick="event.stopPropagation();openEditExisting('${r._key}')">Edit</button>
     <button class="btn-sm btn-sm-red" style="flex:none;padding:7px 11px" onclick="event.stopPropagation();openDeleteExisting('${r._key}')">🗑</button>` : '';
   return `<div class="ex-card" onclick="openExistingDetail('${r._key}')">
@@ -1561,7 +1714,8 @@ function exCardHTML(r){
       <div class="ex-price-row">
         ${[1,2,3,4,5].map(i=>`<div class="ex-yr"><div class="ex-yr-lbl">Thn ${i}</div><div class="ex-yr-val">${h['h'+i]?fmtRp(h['h'+i]):'—'}</div></div>`).join('')}
       </div>
-      <div class="ex-badges">${mapsBtn}${pdfBtn}</div>
+      ${kontakBadge}
+      <div class="ex-badges">${mapsBtn}${depositBadge}${pdfBtn}</div>
       <div class="ex-card-actions" onclick="event.stopPropagation()">
         <button class="btn-sm-outline" style="padding:7px 0;flex:1" onclick="openExistingDetail('${r._key}')">Detail</button>
         ${adminBtns}
@@ -1572,6 +1726,41 @@ function exCardHTML(r){
 
 
 /* ── BUILD DOCS HTML (helper untuk detail) ── */
+
+/* ── BUILD SEWA HTML (helper untuk detail listing) ── */
+function buildSewaHTML(r){
+  if(!r.deposit && !r.sewa?.s1) return '';
+  let html = '<div style="background:#fdf6f2;border:1px solid #EDD9D0;border-radius:10px;padding:13px;margin-bottom:11px">';
+  html += '<div class="box-title" style="margin-bottom:8px">💰 Harga Sewa</div>';
+  if(r.deposit) html += '<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #EDD9D0;margin-bottom:5px"><span style="font-size:13px;font-weight:600;color:#C0543A">Deposit</span><span style="font-size:13px;font-weight:800;color:#C0543A">'+fmtFull(r.deposit)+'</span></div>';
+  if(r.kenaikanSewa) html += '<div style="font-size:11px;color:var(--muted);margin-bottom:6px">Kenaikan: '+r.kenaikanSewa+'% per tahun</div>';
+  if(r.sewa){
+    [1,2,3,4,5].forEach(i=>{
+      const val = r.sewa['s'+i];
+      if(!val) return;
+      const prev = i>1 ? r.sewa['s'+(i-1)] : 0;
+      const diff = prev ? ((val-prev)/prev*100) : null;
+      const diffBadge = diff!==null ? ' <span style="font-size:10px;background:#dcfce7;color:#16a34a;padding:1px 6px;border-radius:8px">+'+diff.toFixed(1)+'%</span>' : '';
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #f0f2f8">';
+      html += '<span style="font-size:12px;color:#555">Tahun '+i+'</span>';
+      html += '<span style="font-size:13px;font-weight:700;color:var(--navy)">'+fmtFull(val)+diffBadge+'</span></div>';
+    });
+  }
+  html += '</div>';
+  return html;
+}
+
+
+function buildDepositChips(r){
+  let html = '';
+  if(!r.deposit && !r.kenaikan) return html;
+  html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">';
+  if(r.deposit) html += '<div style="background:#fdf0eb;border:1px solid #EDD9D0;border-radius:8px;padding:7px 12px"><div style="font-size:10px;color:#A03E28;text-transform:uppercase;letter-spacing:.5px">Deposit</div><div style="font-size:14px;font-weight:800;color:#C0543A">'+fmtRp(r.deposit)+'</div></div>';
+  if(r.kenaikan) html += '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:7px 12px"><div style="font-size:10px;color:#166534;text-transform:uppercase;letter-spacing:.5px">Kenaikan/Tahun</div><div style="font-size:14px;font-weight:800;color:#16a34a">'+r.kenaikan+'%</div></div>';
+  html += '</div>';
+  return html;
+}
+
 function buildDocsHTML(r){
   const docs = [...(r.docs||[])];
   if(r.pdf && !docs.find(d=>d.url===r.pdf)) docs.unshift({label:'Legalitas', url:r.pdf});
@@ -1600,7 +1789,8 @@ window.openExistingDetail = function(key){
   else gallHTML = `<div class="ex-det-gallery multi">${fotos.map((f,i)=>`<img src="${esc(f)}" onclick="openLightbox(${JSON.stringify(fotos)},${i})">`).join('')}</div>`;
 
   // Hitung kenaikan antar tahun
-  const hRows = [1,2,3,4,5].map(i=>{
+  const depositRow = r.deposit ? `<tr style="background:#fdf0eb"><td style="font-weight:600;color:#C0543A">Deposit</td><td style="font-weight:700;color:#C0543A">${fmtFull(r.deposit)}</td></tr>` : '';
+  const hRows = depositRow + [1,2,3,4,5].map(i=>{
     const val = h['h'+i];
     const prev = h['h'+(i-1)];
     const diff = (val&&prev) ? ((val-prev)/prev*100) : null;
@@ -1614,14 +1804,22 @@ window.openExistingDetail = function(key){
       <div style="font-size:18px;font-weight:800;color:#C0543A;margin-bottom:4px">${esc(r.nama||'')}</div>
       <div style="font-size:13px;color:var(--muted)">📍 ${esc(r.alamat||'')}</div>
     </div>
+    ${r.kontak||r.wa ? (()=>{
+      const waLink = r.wa ? 'https://wa.me/'+r.wa.replace(/\D/g,'')+'?text='+encodeURIComponent('Halo, saya ingin tanya tentang '+r.nama) : '';
+      return '<div class="det-contact">👤 '+esc(r.kontak||'')+(r.wa?' · <a href="'+waLink+'" target="_blank">📱 '+esc(r.wa)+'</a>':'')+(r.wa?'<br><a class="btn-wa" href="'+waLink+'" target="_blank">💬 WhatsApp Sekarang</a>':'')+'</div>';
+    })() : ''}
     ${r.maps?'<div style="margin-bottom:10px"><a class="btn-maps" href="'+esc(r.maps)+'" target="_blank">📍 Buka Google Maps</a></div>':''}
     ${buildDocsHTML(r)}
     <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:8px;text-transform:uppercase;letter-spacing:.6px">💰 Harga per Tahun</div>
+    ${buildDepositChips(r)}
     <table class="ex-price-table" style="border-radius:10px;overflow:hidden">
       <thead><tr><th>Tahun</th><th>Harga</th></tr></thead>
       <tbody>${hRows}</tbody>
     </table>
-    <div style="font-size:11px;color:#bbb;text-align:right">Ditambah: ${fmtDate(r.createdAt)}</div>`;
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+      <div style="font-size:11px;color:#bbb">Ditambah: ${fmtDate(r.createdAt)}</div>
+      ${r._fromListing && isAdmin ? `<button onclick="closeModal('existingDetailOverlay');restoreToListing('${key}')" style="background:#2563eb;color:white;border:none;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">↩️ Kembalikan ke Listing</button>` : ''}
+    </div>`;
   openModal('existingDetailOverlay');
 };
 
@@ -1725,8 +1923,79 @@ function setupDragDrop(){
 }
 
 /* ── OPEN FORM ── */
+
+
+
+/* ── SYNC HARGA & KENAIKAN KE SEWA ── */
+window.syncHargaToSewa = function(){
+  const harga = document.getElementById('fHarga')?.value;
+  const sewa1 = document.getElementById('fSewa1');
+  if(sewa1 && harga && !sewa1.dataset.manualEdit){
+    sewa1.value = harga;
+    autoHitungListing();
+  }
+};
+
+window.syncKenaikanToSewa = function(){
+  const kenaikan = document.getElementById('fKenaikan')?.value;
+  const kenaikanSewa = document.getElementById('fKenaikanSewa');
+  if(kenaikanSewa && kenaikan && !kenaikanSewa.dataset.manualEdit){
+    kenaikanSewa.value = kenaikan;
+    autoHitungListing();
+  }
+};
+
+/* ── AUTO HITUNG HARGA SEWA LISTING ── */
+window.autoHitungListing = function(){
+  const h1 = parseFloat(document.getElementById('fSewa1')?.value)||0;
+  const pct = parseFloat(document.getElementById('fKenaikanSewa')?.value)||0;
+  if(!h1 || !pct) return;
+  const mult = 1 + pct/100;
+  [2,3,4,5].forEach(i=>{
+    const val = Math.round(h1 * Math.pow(mult, i-1));
+    const el = document.getElementById('fSewa'+i);
+    if(el){ el.value = val; }
+    const lbl = document.getElementById('fSewa'+i+'Lbl');
+    if(lbl) lbl.textContent = '(auto)';
+  });
+};
+
+/* ── AUTO HITUNG HARGA EXISTING ── */
+window.autoHitungEx = function(){
+  const h1 = parseFloat(document.getElementById('exH1').value)||0;
+  const pct = parseFloat(document.getElementById('exKenaikan').value)||0;
+  if(!h1 || !pct) return;
+  const multiplier = 1 + pct/100;
+  [2,3,4,5].forEach(i=>{
+    const val = Math.round(h1 * Math.pow(multiplier, i-1));
+    const el = document.getElementById('exH'+i);
+    if(el){
+      el.value = val;
+      const lbl = document.getElementById('exH'+i+'Label');
+      if(lbl) lbl.textContent = '(auto)';
+    }
+  });
+};
+
+/* Panggil auto hitung saat modal sudah terbuka & data sudah di-load */
+function triggerAutoHitungExIfNeeded(){
+  const h1 = parseFloat(document.getElementById('exH1')?.value)||0;
+  const pct = parseFloat(document.getElementById('exKenaikan')?.value)||0;
+  const h2 = parseFloat(document.getElementById('exH2')?.value)||0;
+  // Jika h2 kosong tapi h1 dan pct ada → auto hitung
+  if(h1 && pct && !h2) autoHitungEx();
+  // Jika semua sudah ada dari DB → tampilkan label
+  else if(h1 && pct && h2){
+    [2,3,4,5].forEach(i=>{
+      const lbl = document.getElementById('exH'+i+'Label');
+      if(lbl) lbl.textContent = '';
+    });
+  }
+}
+
 function clearExForm(){
-  ['exNama','exAlamat','exMaps','exH1','exH2','exH3','exH4','exH5'].forEach(id=>document.getElementById(id).value='');
+  ['exNama','exAlamat','exMaps','exKontak','exWa','exDeposit','exKenaikan','exH1','exH2','exH3','exH4','exH5'].forEach(id=>{ const el=document.getElementById(id); if(el){ el.value=''; delete el.dataset.manualEdit; } });
+  [2,3,4,5].forEach(i=>{ const l=document.getElementById('exH'+i+'Label'); if(l) l.textContent=''; });
   document.getElementById('exFormId').value='';
   const exFP = document.getElementById('exFotoPreview'); if(exFP) exFP.innerHTML='';
   const exPdfTxt = document.getElementById('exPdfText'); if(exPdfTxt) exPdfTxt.textContent='Klik untuk pilih file PDF';
@@ -1756,6 +2025,12 @@ window.openEditExisting = function(key){
   document.getElementById('exMaps').value=r.maps||'';
   const h=r.harga||{};
   [1,2,3,4,5].forEach(i=>{ if(h['h'+i]) document.getElementById('exH'+i).value=h['h'+i]; });
+  const exKontakEl=document.getElementById('exKontak'); if(exKontakEl) exKontakEl.value=r.kontak||'';
+  const exWaEl=document.getElementById('exWa'); if(exWaEl) exWaEl.value=r.wa||'';
+  const exDepEl=document.getElementById('exDeposit'); if(exDepEl) exDepEl.value=r.deposit||'';
+  const exKenEl=document.getElementById('exKenaikan'); if(exKenEl) exKenEl.value=r.kenaikan||'';
+  // Tandai tahun 2-5 sebagai sudah punya data (manual)
+  [2,3,4,5].forEach(i=>{ const el=document.getElementById('exH'+i); if(el&&el.value) el.dataset.hasData='1'; });
   exFotoUrls=[...(r.fotos||[])]; exFotoFiles=[];
   // Load existing docs
   exDocs = (r.docs||[]).map(d=>({...d, uploading:false, isNew:false}));
@@ -1766,7 +2041,7 @@ window.openEditExisting = function(key){
   document.getElementById('existingFormTitle').textContent='Edit Ruko Existing';
   document.getElementById('exSaveBtn').textContent='✓ Simpan Perubahan';
   openModal('existingFormOverlay');
-  setTimeout(()=>{ renderFotoPreview(); renderExDocs(); setupDragDrop(); }, 80);
+  setTimeout(()=>{ renderFotoPreview(); renderExDocs(); setupDragDrop(); triggerAutoHitungExIfNeeded(); }, 80);
 };
 
 /* ── SAVE ── */
@@ -1799,6 +2074,10 @@ window.saveExisting = async function(){
     const obj={
       nama, alamat,
       maps: document.getElementById('exMaps').value.trim(),
+      kontak: document.getElementById('exKontak')?.value.trim()||'',
+      wa: document.getElementById('exWa')?.value.trim()||'',
+      deposit: Number(document.getElementById('exDeposit').value)||0,
+      kenaikan: parseFloat(document.getElementById('exKenaikan').value)||0,
       harga:{
         h1:Number(document.getElementById('exH1').value)||0,
         h2:Number(document.getElementById('exH2').value)||0,
@@ -2011,6 +2290,46 @@ async function renderPdfPage(pageNum){
 
 window.pdfPrevPage=async()=>{if(pdfCurrentPage>1) await renderPdfPage(pdfCurrentPage-1);};
 window.pdfNextPage=async()=>{if(pdfCurrentPage<pdfTotalPages) await renderPdfPage(pdfCurrentPage+1);};
+
+
+/* ── TOAST WITH UNDO ── */
+let undoTimer, undoCallback=null;
+function showToastWithUndo(msg, undoLabel, onUndo){
+  undoCallback = onUndo;
+  const el = document.getElementById('toast');
+  el.innerHTML = `${msg} <button onclick="doUndo()" style="background:rgba(255,255,255,.2);border:none;color:white;padding:3px 10px;border-radius:10px;margin-left:8px;cursor:pointer;font-size:12px;font-weight:700;font-family:inherit">${undoLabel}</button>`;
+  el.classList.add('show');
+  clearTimeout(undoTimer);
+  undoTimer = setTimeout(()=>{ el.classList.remove('show'); el.innerHTML=''; undoCallback=null; }, 6000);
+}
+window.doUndo = function(){
+  if(undoCallback){ undoCallback(); undoCallback=null; }
+  document.getElementById('toast').classList.remove('show');
+  clearTimeout(undoTimer);
+};
+
+/* ── KEMBALIKAN KE LISTING ── */
+window.restoreToListing = async function(key){
+  if(!isAdmin){ showToast('⛔ Hanya admin'); return; }
+  const r = EXISTING[key]; if(!r) return;
+  if(!confirm('Kembalikan "'+r.nama+'" ke tab Listing?')) return;
+  try {
+    const origData = r._listingData ? {...r._listingData} : {
+      nama: r.nama, alamat: r.alamat||'', maps: r.maps||'',
+      harga: r.harga?.h1||0, fotos: r.fotos||[], docs: r.docs||[],
+      catatan: r.catatan||'', wilayah:'', status:'DONE',
+      kenaikan:0, luas:0, lantai:0, tags:[], kontak:'', wa:'',
+    };
+    delete origData._key;
+    origData.status = 'DONE';
+    origData.updatedAt = Date.now();
+    origData.createdAt = origData.createdAt || Date.now();
+    await push(ref(fbDb,'ruko'), origData);
+    await remove(ref(fbDb,'existing/'+key));
+    showToast('↩️ Ruko berhasil dikembalikan ke Listing');
+    renderExisting();
+  } catch(e){ showToast('❌ '+e.message); }
+};
 
 /* ── SHARE RUKO ── */
 window.shareRuko = function(key){
