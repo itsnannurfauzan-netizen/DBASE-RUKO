@@ -982,9 +982,12 @@ window.switchTab = (tab, btn) => {
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('tab-'+tab).classList.add('active');
+  // Only show filter bar on existing tab
+  const fb = document.getElementById('exFilterBar');
+  if(fb) fb.style.display = (tab==='existing') ? 'block' : 'none';
+  if(tab==='existing') renderExisting();
   if(tab==='dashboard') renderDashboard();
   if(tab==='ekspansi') renderEkspansi();
-  if(tab==='existing') renderExisting();
 };
 
 /* ── STATS ── */
@@ -1678,7 +1681,8 @@ window.renderExisting = function(){
   const c2DP = allData2.filter(r=>r.exStatus==='DP').length;
   const c2P = allData2.filter(r=>r.exStatus==='Pendirian').length;
   const c2R = allData2.filter(r=>r.exStatus==='Running').length;
-  if(fb) fb.style.display='block';
+  // Only show if existing tab is active
+  if(fb) fb.style.display = document.getElementById('tab-existing')?.classList.contains('active') ? 'block' : 'none';
   if(fbi) fbi.innerHTML = `
     <button onclick="filterExisting('')" class="ex-filter-btn ${exStatusFilter===''?'active':''}">Semua <span style="background:rgba(0,0,0,.1);padding:1px 5px;border-radius:7px;font-size:10px">${c2All}</span></button>
     <button onclick="filterExisting('DP')" class="ex-filter-btn ${exStatusFilter==='DP'?'active':''}">🏗️ DP <span style="background:rgba(0,0,0,.1);padding:1px 5px;border-radius:7px;font-size:10px">${c2DP}</span></button>
