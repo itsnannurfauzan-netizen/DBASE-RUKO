@@ -39,7 +39,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 
 /* HEADER */
 .header{background:linear-gradient(135deg,#C0543A 0%,#8B3320 100%);padding:12px 20px;color:white;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(27,43,75,.4)}
-.header-inner{max-width:1100px;margin:0 auto}
+.header-inner{max-width:100%;margin:0 auto}
 .header-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:11px}
 .brand-icon{width:40px;height:40px;background:#F2A882;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
@@ -56,14 +56,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .stat-val{font-size:16px;font-weight:800;color:#F2A882;display:block;margin-top:1px}
 
 /* TABS */
-.tab-bar{background:var(--white);border-bottom:2px solid var(--border);padding:0 20px;position:sticky;top:104px;z-index:89;display:flex;overflow-x:auto}
+.tab-bar{background:var(--bg);border-bottom:1px solid var(--border);padding:10px 16px;position:sticky;top:62px;z-index:89;display:flex;gap:6px;overflow-x:auto}
+.tab-bar::-webkit-scrollbar{display:none}
 @media(max-width:640px){.tab-bar{top:58px}}
-.tab-btn{padding:11px 18px;border:none;background:none;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;font-family:inherit;transition:color .15s}
-.tab-btn.active{color:#C0543A;border-bottom-color:#C0543A}
+.tab-btn{padding:7px 16px;border:1.5px solid var(--border);background:var(--white);font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-radius:20px;white-space:nowrap;font-family:inherit;transition:all .2s;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.tab-btn.active{background:#C0543A;border-color:#C0543A;color:white;box-shadow:0 3px 10px rgba(192,84,58,.3)}
+.tab-btn:hover:not(.active){background:#fdf0eb;border-color:#C0543A;color:#C0543A}
 
 /* FILTER BAR */
 .filter-bar{background:var(--white);border-bottom:1px solid var(--border);padding:10px 20px}
-.filter-inner{max-width:1100px;margin:0 auto;display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.filter-inner{max-width:100%;margin:0 auto;display:flex;gap:7px;flex-wrap:wrap;align-items:center}
 .search-wrap{flex:1;min-width:170px;position:relative}
 .search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:13px;pointer-events:none}
 .filter-input{width:100%;padding:8px 10px 8px 32px;border:1.5px solid var(--border);border-radius:var(--rs);font-size:13px;font-family:inherit;background:white;color:var(--text);outline:none;transition:border-color .2s}
@@ -74,7 +76,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .view-btn.active{background:#C0543A;border-color:#C0543A;color:white}
 
 /* MAIN */
-.main{max-width:1100px;margin:0 auto;padding:16px 14px 40px}
+.main{max-width:100%;margin:0 auto;padding:16px 20px 40px}
 .tab-panel{display:none}.tab-panel.active{display:block}
 
 /* GRID */
@@ -332,6 +334,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .pdf-nav button:hover{background:rgba(255,255,255,.25)}
 .pdf-nav button:disabled{opacity:.4;cursor:not-allowed}
 
+
+.ex-filter-btn{padding:5px 12px;border:1.5px solid var(--border);background:white;border-radius:15px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;font-family:inherit;transition:all .15s}
+.ex-filter-btn.active{background:#C0543A;border-color:#C0543A;color:white}
+.ex-filter-btn:hover:not(.active){border-color:#C0543A;color:#C0543A}
+.ex-status-badge{display:inline-block;padding:3px 9px;border-radius:10px;font-size:11px;font-weight:700;white-space:nowrap}
+
+
+/* DATE HIGHLIGHT BADGES */
+.date-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:8px;font-size:12px;font-weight:700}
+.date-badge-mulai{background:#e8f5e9;color:#2e7d32}
+.date-badge-bayar-ok{background:#e3f2fd;color:#1565c0}
+.date-badge-bayar-soon{background:#fff3e0;color:#e65100}
+.date-badge-bayar-urgent{background:#fce4ec;color:#c62828}
+.date-section{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+
 .ex-empty{text-align:center;padding:50px 20px;color:var(--muted)}
 
 .guest-badge{display:none;margin-left:7px;background:rgba(255,255,255,.2);padding:1px 8px;border-radius:9px;font-size:10px}
@@ -474,17 +491,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     </div>
   </div>
   <div class="tab-bar" style="position:static">
-    <button class="tab-btn active" onclick="switchTab('listing',this)">🏢 Listing</button>
+    <button class="tab-btn active" onclick="switchTab('existing',this)">📍 Ruko Existing</button>
+    <button class="tab-btn" onclick="switchTab('listing',this)">🏢 Listing</button>
     <button class="tab-btn" onclick="switchTab('dashboard',this)">📊 Dashboard</button>
     <button class="tab-btn" onclick="switchTab('ekspansi',this)">🗺️ Rekomendasi Ekspansi</button>
-    <button class="tab-btn" onclick="switchTab('existing',this)">📍 Ruko Existing</button>
   </div>
 </div>
 
 <!-- MAIN -->
 <main class="main" id="appMain" style="display:none">
   <!-- LISTING TAB -->
-  <div class="tab-panel active" id="tab-listing">
+  <div class="tab-panel" id="tab-listing">
     <div class="skeleton-grid" id="skeletonGrid">
       <div class="skel-card"><div class="skel-img"></div><div class="skel-body"><div class="skel-line m"></div><div class="skel-line s"></div><div class="skel-line"></div></div></div>
       <div class="skel-card"><div class="skel-img"></div><div class="skel-body"><div class="skel-line m"></div><div class="skel-line s"></div><div class="skel-line"></div></div></div>
@@ -510,7 +527,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 
 
   <!-- EXISTING RUKO TAB -->
-  <div class="tab-panel" id="tab-existing">
+  <div class="tab-panel active" id="tab-existing">
     <div id="existingContent">
       <div class="skel-card" style="border-radius:14px;padding:20px;margin-bottom:14px"><div class="skel-line m"></div><div class="skel-line s"></div></div>
     </div>
@@ -534,6 +551,30 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
       <input type="hidden" id="exFormId">
       <div class="form-grid">
         <div class="fg full"><label class="flbl">Nama Lokasi *</label><input class="fi" id="exNama" placeholder="cth. Ruko Jalan Merdeka No.5"></div>
+        <div class="fg full">
+          <label class="flbl">Status Operasional</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+            <label id="exStatusDP" style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;padding:8px 16px;border:1.5px solid var(--border);border-radius:20px;font-size:13px;font-weight:600;transition:all .2s;background:white">
+              <input type="radio" name="exStatus" value="DP" style="display:none" onchange="updateExStatusStyle()"> 🏗️ DP
+            </label>
+            <label id="exStatusPendirian" style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;padding:8px 16px;border:1.5px solid var(--border);border-radius:20px;font-size:13px;font-weight:600;transition:all .2s;background:white">
+              <input type="radio" name="exStatus" value="Pendirian" style="display:none" onchange="updateExStatusStyle()"> 🔨 Pendirian
+            </label>
+            <label id="exStatusRunning" style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;padding:8px 16px;border:1.5px solid var(--border);border-radius:20px;font-size:13px;font-weight:600;transition:all .2s;background:white">
+              <input type="radio" name="exStatus" value="Running" style="display:none" onchange="updateExStatusStyle()"> ✅ Running
+            </label>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="fg">
+            <label class="flbl">📅 Tanggal Serah Terima / Mulai Sewa</label>
+            <input class="fi" id="exTglMulai" type="date">
+          </div>
+          <div class="fg">
+            <label class="flbl">💳 Tanggal Pembayaran Tahun Berikutnya</label>
+            <input class="fi" id="exTglBayar" type="date">
+          </div>
+        </div>
         <div class="fg full"><label class="flbl">Alamat Lengkap *</label><textarea class="fta" id="exAlamat" placeholder="Jl. Merdeka No.5, Kel. ..., Kec. ..., Kota ..."></textarea></div>
         <div class="fg full">
           <label class="flbl">Titik Google Maps (URL atau koordinat)</label>
@@ -896,6 +937,7 @@ function startApp() {
     DB = snap.val()||{};
     setSyncStatus('connected');
     renderStats(); renderCards();
+    if(document.getElementById('tab-existing').classList.contains('active')) renderExisting();
     if(document.getElementById('tab-dashboard').classList.contains('active')) renderDashboard();
     checkShareUrl();
   }, err => { setSyncStatus('error'); showToast('❌ '+err.message); });
@@ -1625,10 +1667,21 @@ let exView = 'grid';
 
 window.renderExisting = function(){
   const list = Object.entries(EXISTING).map(([k,v])=>({...v,_key:k}))
+    .filter(r=>!exStatusFilter||r.exStatus===exStatusFilter)
     .sort((a,b)=>(a.nama||'').localeCompare(b.nama||''));
+  const filterBtns = `<div style="display:flex;gap:5px;flex-wrap:wrap">
+    <button onclick="filterExisting('')" id="exFAll" class="ex-filter-btn active">Semua</button>
+    <button onclick="filterExisting('DP')" id="exFDP" class="ex-filter-btn">🏗️ DP</button>
+    <button onclick="filterExisting('Pendirian')" id="exFPendirian" class="ex-filter-btn">🔨 Pendirian</button>
+    <button onclick="filterExisting('Running')" id="exFRunning" class="ex-filter-btn">✅ Running</button>
+  </div>`;
   const adminBtn = isAdmin ? `<button class="btn-add" onclick="openAddExisting()" style="font-size:13px">+ Tambah Ruko Existing</button>` : '';
   let html = `<div class="ex-header">
-    <div><div class="ex-title">📍 Ruko Existing</div><div class="ex-sub">${list.length} lokasi terdaftar</div></div>
+    <div>
+      <div class="ex-title">📍 Ruko Existing</div>
+      <div class="ex-sub">${list.length} lokasi terdaftar</div>
+      ${filterBtns}
+    </div>
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
       <div class="view-toggle">
         <button class="view-btn ${exView==='grid'?'active':''}" id="btnExGrid" onclick="setExView('grid')" title="Grid">⊞</button>
@@ -1660,6 +1713,9 @@ function exListHTML(r){
   const h = r.harga||{};
   const harga1 = h.h1 ? fmtRp(h.h1) : '—';
   const harga5 = h.h5 ? fmtRp(h.h5) : '—';
+  const exStat = r.exStatus||''; 
+  const exStatColor = exStat==='Running'?{bg:'#dcfce7',c:'#16a34a'}:exStat==='Pendirian'?{bg:'#fef3c7',c:'#d97706'}:exStat==='DP'?{bg:'#dbeafe',c:'#2563eb'}:{bg:'#f3f4f6',c:'#6b7280'};
+  const statusBadge = exStat ? `<span class="ex-status-badge" style="background:${exStatColor.bg};color:${exStatColor.c}">${exStat==='Running'?'✅':exStat==='Pendirian'?'🔨':'🏗️'} ${exStat}</span>` : '';
   const mapsBtn = r.maps ? `<a class="ex-badge ex-badge-maps" href="${esc(r.maps)}" target="_blank" onclick="event.stopPropagation()">📍 Maps</a>` : '';
   const depositBadge = r.deposit ? `<span class="ex-badge" style="background:#fdf0eb;color:#C0543A">🏷️ Deposit: ${fmtRp(r.deposit)}</span>` : '';
   const kontakBadge = r.kontak ? `<div class="card-contact">👤 ${esc(r.kontak)}${r.wa?' · 📱 '+esc(r.wa):''}</div>` : '';
@@ -1678,6 +1734,7 @@ function exListHTML(r){
       <div class="list-name">${esc(r.nama||'')}</div>
       <div class="list-loc" style="font-size:11px;color:var(--muted);margin-top:2px">📍 ${esc(r.alamat||'')}</div>
       <div style="display:flex;gap:5px;margin-top:5px">${mapsBtn}${pdfBtn}</div>
+      ${buildDateBadges(r)}
     </div>
     <div class="list-right">
       <div class="list-price" style="font-size:13px">Thn 1: ${harga1}</div>
@@ -1694,6 +1751,9 @@ function exCardHTML(r){
   const fotos = r.fotos||[];
   const thumb = fotos[0] || 'https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600&q=80';
   const h = r.harga||{};
+  const exStat = r.exStatus||''; 
+  const exStatColor = exStat==='Running'?{bg:'#dcfce7',c:'#16a34a'}:exStat==='Pendirian'?{bg:'#fef3c7',c:'#d97706'}:exStat==='DP'?{bg:'#dbeafe',c:'#2563eb'}:{bg:'#f3f4f6',c:'#6b7280'};
+  const statusBadge = exStat ? `<span class="ex-status-badge" style="background:${exStatColor.bg};color:${exStatColor.c}">${exStat==='Running'?'✅':exStat==='Pendirian'?'🔨':'🏗️'} ${exStat}</span>` : '';
   const mapsBtn = r.maps ? `<a class="ex-badge ex-badge-maps" href="${esc(r.maps)}" target="_blank" onclick="event.stopPropagation()">📍 Maps</a>` : '';
   const depositBadge = r.deposit ? `<span class="ex-badge" style="background:#fdf0eb;color:#C0543A">🏷️ Deposit: ${fmtRp(r.deposit)}</span>` : '';
   const kontakBadge = r.kontak ? `<div class="card-contact">👤 ${esc(r.kontak)}${r.wa?' · 📱 '+esc(r.wa):''}</div>` : '';
@@ -1715,7 +1775,8 @@ function exCardHTML(r){
         ${[1,2,3,4,5].map(i=>`<div class="ex-yr"><div class="ex-yr-lbl">Thn ${i}</div><div class="ex-yr-val">${h['h'+i]?fmtRp(h['h'+i]):'—'}</div></div>`).join('')}
       </div>
       ${kontakBadge}
-      <div class="ex-badges">${mapsBtn}${depositBadge}${pdfBtn}</div>
+      ${buildDateBadges(r)}
+      <div class="ex-badges">${statusBadge}${mapsBtn}${depositBadge}${pdfBtn}</div>
       <div class="ex-card-actions" onclick="event.stopPropagation()">
         <button class="btn-sm-outline" style="padding:7px 0;flex:1" onclick="openExistingDetail('${r._key}')">Detail</button>
         ${adminBtns}
@@ -1750,6 +1811,33 @@ function buildSewaHTML(r){
   return html;
 }
 
+
+
+/* ── DATE BADGE HELPER ── */
+function buildDateBadges(r){
+  if(!r.tglMulai && !r.tglBayar) return '';
+  const today = new Date(); today.setHours(0,0,0,0);
+  let html = '<div class="date-section">';
+  if(r.tglMulai){
+    const d = new Date(r.tglMulai);
+    const str = d.toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'});
+    html += `<span class="date-badge date-badge-mulai">📅 Mulai: ${str}</span>`;
+  }
+  if(r.tglBayar){
+    const d = new Date(r.tglBayar); d.setHours(0,0,0,0);
+    const diffDays = Math.round((d-today)/(1000*60*60*24));
+    const str = d.toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'});
+    let cls = 'date-badge-bayar-ok';
+    let prefix = '💳';
+    if(diffDays < 0){ cls='date-badge-bayar-urgent'; prefix='🔴'; }
+    else if(diffDays <= 30){ cls='date-badge-bayar-urgent'; prefix='🚨'; }
+    else if(diffDays <= 60){ cls='date-badge-bayar-soon'; prefix='⚠️'; }
+    const label = diffDays < 0 ? `LEWAT ${Math.abs(diffDays)} hari` : diffDays === 0 ? 'HARI INI' : `${diffDays} hari lagi`;
+    html += `<span class="date-badge ${cls}">${prefix} Bayar: ${str} · ${label}</span>`;
+  }
+  html += '</div>';
+  return html;
+}
 
 function buildDepositChips(r){
   let html = '';
@@ -1850,6 +1938,41 @@ function renderFotoPreview(){
 
 window.removeUploadedFoto = i => { exFotoUrls.splice(i,1); renderFotoPreview(); };
 window.removeNewFoto = i => { exFotoFiles.splice(i,1); renderFotoPreview(); };
+
+
+/* ── EXISTING STATUS FILTER ── */
+let exStatusFilter = '';
+
+window.filterExisting = function(status){
+  exStatusFilter = status;
+  // Update button styles
+  ['exFAll','exFDP','exFPendirian','exFRunning'].forEach(id=>{
+    const btn = document.getElementById(id);
+    if(btn) btn.classList.remove('active');
+  });
+  const activeId = status===''?'exFAll':status==='DP'?'exFDP':status==='Pendirian'?'exFPendirian':'exFRunning';
+  const activeBtn = document.getElementById(activeId);
+  if(activeBtn) activeBtn.classList.add('active');
+  renderExisting();
+};
+
+window.updateExStatusStyle = function(){
+  const val = document.querySelector('input[name="exStatus"]:checked')?.value;
+  ['exStatusDP','exStatusPendirian','exStatusRunning'].forEach(id=>{
+    const lbl = document.getElementById(id);
+    if(!lbl) return;
+    const isSelected = lbl.querySelector('input')?.value === val;
+    lbl.style.background = isSelected ? '#C0543A' : 'white';
+    lbl.style.color = isSelected ? 'white' : '';
+    lbl.style.borderColor = isSelected ? '#C0543A' : '';
+  });
+};
+
+function setExStatusRadio(val){
+  const inputs = document.querySelectorAll('input[name="exStatus"]');
+  inputs.forEach(inp=>{ inp.checked = inp.value===val; });
+  updateExStatusStyle();
+}
 
 /* ── MULTI DOKUMEN ── */
 let exDocs = []; // [{label, url, uploading, isNew, file}]
@@ -1994,12 +2117,13 @@ function triggerAutoHitungExIfNeeded(){
 }
 
 function clearExForm(){
-  ['exNama','exAlamat','exMaps','exKontak','exWa','exDeposit','exKenaikan','exH1','exH2','exH3','exH4','exH5'].forEach(id=>{ const el=document.getElementById(id); if(el){ el.value=''; delete el.dataset.manualEdit; } });
+  ['exNama','exAlamat','exMaps','exKontak','exWa','exDeposit','exKenaikan','exH1','exH2','exH3','exH4','exH5','exTglMulai','exTglBayar'].forEach(id=>{ const el=document.getElementById(id); if(el){ el.value=''; delete el.dataset.manualEdit; } });
   [2,3,4,5].forEach(i=>{ const l=document.getElementById('exH'+i+'Label'); if(l) l.textContent=''; });
   document.getElementById('exFormId').value='';
   const exFP = document.getElementById('exFotoPreview'); if(exFP) exFP.innerHTML='';
   const exPdfTxt = document.getElementById('exPdfText'); if(exPdfTxt) exPdfTxt.textContent='Klik untuk pilih file PDF';
   exFotoFiles=[]; exFotoUrls=[]; exDocs=[];
+  setTimeout(()=>{ document.querySelectorAll('input[name="exStatus"]').forEach(i=>i.checked=false); updateExStatusStyle(); }, 60);
   const docLabel = document.getElementById('exDocLabel');
   if(docLabel) docLabel.value='';
   const docsWrap = document.getElementById('exDocsContainer');
@@ -2026,6 +2150,9 @@ window.openEditExisting = function(key){
   const h=r.harga||{};
   [1,2,3,4,5].forEach(i=>{ if(h['h'+i]) document.getElementById('exH'+i).value=h['h'+i]; });
   const exKontakEl=document.getElementById('exKontak'); if(exKontakEl) exKontakEl.value=r.kontak||'';
+  const exTglMulaiEl=document.getElementById('exTglMulai'); if(exTglMulaiEl) exTglMulaiEl.value=r.tglMulai||'';
+  const exTglBayarEl=document.getElementById('exTglBayar'); if(exTglBayarEl) exTglBayarEl.value=r.tglBayar||'';
+  setTimeout(()=>{ setExStatusRadio(r.exStatus||''); }, 60);
   const exWaEl=document.getElementById('exWa'); if(exWaEl) exWaEl.value=r.wa||'';
   const exDepEl=document.getElementById('exDeposit'); if(exDepEl) exDepEl.value=r.deposit||'';
   const exKenEl=document.getElementById('exKenaikan'); if(exKenEl) exKenEl.value=r.kenaikan||'';
@@ -2074,6 +2201,9 @@ window.saveExisting = async function(){
     const obj={
       nama, alamat,
       maps: document.getElementById('exMaps').value.trim(),
+      exStatus: document.querySelector('input[name="exStatus"]:checked')?.value||'',
+      tglMulai: document.getElementById('exTglMulai')?.value||'',
+      tglBayar: document.getElementById('exTglBayar')?.value||'',
       kontak: document.getElementById('exKontak')?.value.trim()||'',
       wa: document.getElementById('exWa')?.value.trim()||'',
       deposit: Number(document.getElementById('exDeposit').value)||0,
