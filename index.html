@@ -496,6 +496,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <button class="tab-btn" onclick="switchTab('dashboard',this)">📊 Dashboard</button>
     <button class="tab-btn" onclick="switchTab('ekspansi',this)">🗺️ Rekomendasi Ekspansi</button>
   </div>
+  <!-- Existing filter bar - always sticky below tabs -->
+  <div id="exFilterBar" style="display:none;background:var(--bg);padding:7px 20px 7px;border-top:1px solid var(--border)">
+    <div id="exFilterBarInner" style="display:flex;gap:5px;flex-wrap:wrap;align-items:center"></div>
+  </div>
 </div>
 
 <!-- MAIN -->
@@ -1666,21 +1670,47 @@ let listingFotoUrls  = [];  // Already-uploaded listing foto URLs (edit mode)
 let exView = 'grid';
 
 window.renderExisting = function(){
+  // Show & update the sticky filter bar in appBars
+  const fb = document.getElementById('exFilterBar');
+  const fbi = document.getElementById('exFilterBarInner');
+  const allData2 = Object.values(EXISTING);
+  const c2All = allData2.length;
+  const c2DP = allData2.filter(r=>r.exStatus==='DP').length;
+  const c2P = allData2.filter(r=>r.exStatus==='Pendirian').length;
+  const c2R = allData2.filter(r=>r.exStatus==='Running').length;
+  if(fb) fb.style.display='block';
+  if(fbi) fbi.innerHTML = `
+    <button onclick="filterExisting('')" class="ex-filter-btn ${exStatusFilter===''?'active':''}">Semua <span style="background:rgba(0,0,0,.1);padding:1px 5px;border-radius:7px;font-size:10px">${c2All}</span></button>
+    <button onclick="filterExisting('DP')" class="ex-filter-btn ${exStatusFilter==='DP'?'active':''}">🏗️ DP <span style="background:rgba(0,0,0,.1);padding:1px 5px;border-radius:7px;font-size:10px">${c2DP}</span></button>
+    <button onclick="filterExisting('Pendirian')" class="ex-filter-btn ${exStatusFilter==='Pendirian'?'active':''}">🔨 Pendirian <span style="background:rgba(0,0,0,.1);padding:1px 5px;border-radius:7px;font-size:10px">${c2P}</span></button>
+    <button onclick="filterExisting('Running')" class="ex-filter-btn ${exStatusFilter==='Running'?'active':''}">✅ Running <span style="background:rgba(0,0,0,.1);padding:1px 5px;border-radius:7px;font-size:10px">${c2R}</span></button>
+    <div style="margin-left:auto;display:flex;gap:4px">
+      <button class="view-btn ${exView==='grid'?'active':''}" onclick="setExView('grid')">⊞</button>
+      <button class="view-btn ${exView==='list'?'active':''}" onclick="setExView('list')">☰</button>
+    </div>`;
+
   const list = Object.entries(EXISTING).map(([k,v])=>({...v,_key:k}))
     .filter(r=>!exStatusFilter||r.exStatus===exStatusFilter)
     .sort((a,b)=>(a.nama||'').localeCompare(b.nama||''));
-  const filterBtns = `<div style="display:flex;gap:5px;flex-wrap:wrap">
-    <button onclick="filterExisting('')" id="exFAll" class="ex-filter-btn active">Semua</button>
-    <button onclick="filterExisting('DP')" id="exFDP" class="ex-filter-btn">🏗️ DP</button>
-    <button onclick="filterExisting('Pendirian')" id="exFPendirian" class="ex-filter-btn">🔨 Pendirian</button>
-    <button onclick="filterExisting('Running')" id="exFRunning" class="ex-filter-btn">✅ Running</button>
+  // Count per status
+  const allData = Object.values(EXISTING);
+  const cAll = allData.length;
+  const cDP = allData.filter(r=>r.exStatus==='DP').length;
+  const cPendirian = allData.filter(r=>r.exStatus==='Pendirian').length;
+  const cRunning = allData.filter(r=>r.exStatus==='Running').length;
+  const cLainnya = allData.filter(r=>!r.exStatus).length;
+
+  const filterBtns = `<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:8px">
+    <button onclick="filterExisting('')" id="exFAll" class="ex-filter-btn ${exStatusFilter===''?'active':''}">Semua <span style="background:rgba(0,0,0,.1);padding:1px 6px;border-radius:8px;font-size:11px">${cAll}</span></button>
+    <button onclick="filterExisting('DP')" id="exFDP" class="ex-filter-btn ${exStatusFilter==='DP'?'active':''}">🏗️ DP <span style="background:rgba(0,0,0,.1);padding:1px 6px;border-radius:8px;font-size:11px">${cDP}</span></button>
+    <button onclick="filterExisting('Pendirian')" id="exFPendirian" class="ex-filter-btn ${exStatusFilter==='Pendirian'?'active':''}">🔨 Pendirian <span style="background:rgba(0,0,0,.1);padding:1px 6px;border-radius:8px;font-size:11px">${cPendirian}</span></button>
+    <button onclick="filterExisting('Running')" id="exFRunning" class="ex-filter-btn ${exStatusFilter==='Running'?'active':''}">✅ Running <span style="background:rgba(0,0,0,.1);padding:1px 6px;border-radius:8px;font-size:11px">${cRunning}</span></button>
   </div>`;
   const adminBtn = isAdmin ? `<button class="btn-add" onclick="openAddExisting()" style="font-size:13px">+ Tambah Ruko Existing</button>` : '';
   let html = `<div class="ex-header">
     <div>
       <div class="ex-title">📍 Ruko Existing</div>
-      <div class="ex-sub">${list.length} lokasi terdaftar</div>
-      ${filterBtns}
+      <div class="ex-sub">${list.length} dari ${cAll} lokasi</div>
     </div>
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
       <div class="view-toggle">
@@ -1689,7 +1719,8 @@ window.renderExisting = function(){
       </div>
       ${adminBtn}
     </div>
-  </div>`;
+  </div>
+  <div style="height:1px;background:var(--border);margin-bottom:10px"></div>`;
   if(!list.length){
     html += `<div class="ex-empty"><div style="font-size:44px;margin-bottom:12px">🏠</div><div style="font-size:15px;font-weight:700;color:#aaa">Belum ada ruko existing</div><div style="font-size:13px">Klik "+ Tambah Ruko Existing" untuk mulai</div></div>`;
   } else {
@@ -1731,7 +1762,10 @@ function exListHTML(r){
   return `<div class="list-card" onclick="openExistingDetail('${r._key}')">
     <img class="list-thumb" src="${esc(thumb)}" onerror="this.src='https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600&q=80'" alt="" style="width:80px;height:64px;border-radius:8px;object-fit:cover;flex-shrink:0">
     <div class="list-info">
-      <div class="list-name">${esc(r.nama||'')}</div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <div class="list-name">${esc(r.nama||'')}</div>
+        ${statusBadge}
+      </div>
       <div class="list-loc" style="font-size:11px;color:var(--muted);margin-top:2px">📍 ${esc(r.alamat||'')}</div>
       <div style="display:flex;gap:5px;margin-top:5px">${mapsBtn}${pdfBtn}</div>
       ${buildDateBadges(r)}
@@ -1945,15 +1979,7 @@ let exStatusFilter = '';
 
 window.filterExisting = function(status){
   exStatusFilter = status;
-  // Update button styles
-  ['exFAll','exFDP','exFPendirian','exFRunning'].forEach(id=>{
-    const btn = document.getElementById(id);
-    if(btn) btn.classList.remove('active');
-  });
-  const activeId = status===''?'exFAll':status==='DP'?'exFDP':status==='Pendirian'?'exFPendirian':'exFRunning';
-  const activeBtn = document.getElementById(activeId);
-  if(activeBtn) activeBtn.classList.add('active');
-  renderExisting();
+  renderExisting(); // renderExisting rebuilds filter buttons with correct active state
 };
 
 window.updateExStatusStyle = function(){
